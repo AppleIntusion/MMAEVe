@@ -1,0 +1,7 @@
+You have functions to import the atoms of a pdb file. You are working on
+generating a molecule class that can easily have class methods like transformation
+and rotation performed on it.
+
+A good point to pick up at would be making a funtion in the manipulate_pdb.py module
+that creates a Molecule() class object using the information imported from a
+PDB file.
