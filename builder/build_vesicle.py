@@ -124,7 +124,7 @@ class Vesicle(bmi.Micelle):
 
 		# Convert familythe list of micelle lipids to a list of lists containing strings for 
 		# each atom.
-		self.struc_to_lines()
+#		self.struc_to_lines()
 
 	def build_vesicle(self, \
                       outer_lipids, outer_frac, outer_radius, outer_points, \
@@ -142,7 +142,8 @@ class Vesicle(bmi.Micelle):
 
 if __name__ == "__main__":
 	vesicle = Vesicle()
-	vesicle_file = "/home/gubbin/Documents/mdProjects/programs/MMAEVe/lipids/test2.pdb"
-	vesicle.build_vesicle(["POC"], [1.0], 100, 1000, ["POC"], [1.0], 75, 600, vesicle_file)
+	#vesicle_file = "/home/gubbin/Documents/mdProjects/programs/MMAEVe/lipids/test2.pdb"
+	test_file = "/home/sanchezw/MMAEVe/lipids/test2.pdb"
+	vesicle.build_vesicle(["POC"], [1.0], 100, 100, ["POC"], [1.0], 75, 50, test_file)
 
 	

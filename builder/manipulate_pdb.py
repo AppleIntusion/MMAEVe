@@ -22,27 +22,44 @@ class PdbFile():
 
 	#%# Update to include a count of file lines and fields. At the
 	#   moment I just need it to import ATOM information.
-	def __init__(self, file_name = "None", lipid_name = "None"):
-		# Variable to control whether class instance is initialized.
-		run = False
-		if file_name == "None" and lipid_name == "None":
-			print("Either file_path or lipid_name must be specified. Both" + \
-			      "cannot be unspecified.")
-		elif file_name != "None" and lipid_name != "None":
-			print("Either file_path or lipid_name must be specified. Both" + \
-			      "cannot be specified.")
-		else:
-			run = True
+	def __init__(self, file_name = "None", lipid_name = "None", protein_name = "None"):
 
-		# File name is generated if a lipid name is specified instead of a file
-		# name.
-		if run == True and file_name != "None":
+					###LIPID MANIPULATION###
+
+		run_lipid = False
+		run_protein = False
+		run_file = False
+		
+		if file_name =="None" and lipid_name == "None" and protein_name == "None":
+			print("You cannot be serious, are you even trying to run this program? \
+				NO FILE OR STRUCTURE SPECIFIED")
+	
+		if lipid_name != "None" and protein_name != "None":
+			print("You cannot specify both lipid_name and protein name +\
+			       Please specify one of the following : lipid_name, protein_name, or file_name")
+
+		if (file_name != "None" and lipid_name != "None") or (file_name != "None" and protein_name != "None"):
+			print("You cannot specify both a protein/lipid structure and a file name.")
+		
+		if file_name == "None" and lipid_name != "None" and protein_name =="None":
+			run_lipid = True
+	
+		if file_name == "None" and lipid_name == "None" and protein_name !="None":
+			run_protein = True
+		
+		if file_name != "None" and lipid_name == "None" and protein_name =="None":
+			run_file = True
+
+		if run_file == True and file_name != "None":
 			pass
-		elif run == True and lipid_name  != "None":
+
+		if run_lipid == True and lipid_name != "None":
 			file_name = "../lipids/" + lipid_name + ".pdb"
 
+		if run_protein == True and protein_name != "None":
+			file_name = "../proteins" + protein_name + ".pdb" 
 		# If name is specified properly then initialize the class instance.
-		if run == True:
+		if run_lipid == True or run_protein == True or run_file == True:
 			file_lines = manf.import_file_contents(file_name)
 			atom_stuff = []
 			for line in file_lines:
@@ -106,3 +123,14 @@ class PdbFile():
 		return mols.Lipid(atom_dict = molecule_atoms)
 
 
+	def to_protein(self):
+		molecule_atoms = dict() 
+		for atom in self.atom_info:
+			atom_mass = mols.atomic_masses[atom[13]]
+			molecule_atoms[atom[1]] = mols.Atom(serial = atom[1],   x      = atom[8],  
+			                                    y      = atom[9],   z      = atom[10], 
+			                                    mass   = atom_mass, resi   = atom[6],        
+			                                    resn   = atom[4],   elem   = atom[13], 
+			                                    name   = atom[2],   charge = atom[14])
+
+		return mols.Protein(atom_dict = molecule_atoms)

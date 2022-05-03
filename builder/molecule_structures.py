@@ -39,8 +39,6 @@ atomic_masses = {'H': 1.007825, 'He': 4.002603, 'Li': 7.016004, \
                  'Be': 9.012182, 'B': 11.009305, 'C': 12.000000, \
                  'N': 14.003074, 'O': 15.994915, 'F': 18.998403, \
                  'P': 30.973762, 'S': 31.972071}
-test = Atom()
-atomic_masses[test.elem]
 class Atom(object):
 	'''
 	Contains important information needed to describe atoms.
@@ -52,7 +50,7 @@ class Atom(object):
 	    "NA" unless specified.
 	'''
 	def __init__(self, serial = 0, x = 0, y = 0, z = 0, mass = 0, resi = 0, resn = "NA", \
-                 elem = "NA", name = "NA", charge = 0):
+                     chain = " ", elem = "NA", name = "NA", charge = 0):
 		self.serial = serial
 		self.x      = x   
 		self.y      = y   
@@ -60,6 +58,7 @@ class Atom(object):
 		self.mass   = mass
 		self.resi   = resi
 		self.resn   = resn
+		self.chain  = chain
 		self.elem   = elem
 		self.name   = name
 		self.charge = charge
@@ -152,7 +151,7 @@ class Atom(object):
 	               (3) The residue sequence number as an integer. If it is
 	                   0 the value already assigned will be used.
 	'''
-	def to_pdb_file(self, atom_serial = '0', resn_seq = '0'):
+	def to_pdb_file(self, atom_serial = '0', resn_seq = '0', chain=''):
 		# All the required entries for an ATOM field entry in a pdb file.
 		record_name = "ATOM"
 		if atom_serial == '0':
@@ -164,7 +163,7 @@ class Atom(object):
 		atom_name = self.name
 		alternate_loc = ' '
 		resn_name = self.resn 
-		chain = ' '
+		chain = self.chain
 		if resn_seq == '0':
 			resn_seq = str(self.resi)
 		else:
@@ -184,7 +183,7 @@ class Atom(object):
 		# Atom serial number
 		line.append(((5 - len(atom_serial)) * ' ') + atom_serial)
 		# Atom name
-		line.append('  ' + atom_name + ((3 - len(atom_name)) * ' '))
+		line.append(' ' + atom_name + ((4 - len(atom_name)) * ' ')) #DEBUG line.append('  ' + atom_name + ((3 - len(atom_name)) * ' '))
 		# Alternate location
 		line.append(alternate_loc)
 		# Residue name
@@ -206,9 +205,9 @@ class Atom(object):
 		# Temperature factor
 		line.append(((6 - len(tmp_fac)) * ' ') + tmp_fac)
 		# Segment identifier
-		line.append('	  ' + seg_iden + ((4 - len(seg_iden)) * ' '))
+		line.append('   ' + seg_iden + ((4 - len(seg_iden)) * ' '))
 		# Elemental symbol
-		line.append(((2 - len(elem)) * ' ') + elem)
+		line.append(((2 - len(elem)) * '    ') + elem)
 		# Charge
 		line.append(((2 - len(charge)) * ' ') + charge)
 		line.append('\n')
@@ -415,4 +414,9 @@ class Lipid(object):
 		# Translate the lipid to the position on the sphere.
 		self.translate(t = distance_vec)
 
+class Protein(Lipid):
+	'''
+	Inherited Lipid Class
+	'''
 
+	
