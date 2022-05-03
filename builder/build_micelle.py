@@ -109,7 +109,7 @@ class Micelle(object):
 
 		# Coordinates on the surface of the sphere which lipids will be mapped to.
 		sph_coord = gs.fib_sphere(points, radius = radius)
-
+		print(sph_coord)
 		for ii in range(0, len(sph_coord)):
 			# Copy of lipid
 			lipid = copy.deepcopy(struc[lipid_id[ii]])
@@ -123,6 +123,7 @@ class Micelle(object):
 
 			# Rotate lipid to align with the position vector on the sphere's surface.
 			lipid.align_axis_o_to_vec(extrema, sph_coord[ii])
+			
 
 			# Translate the lipid to the position on the sphere.
 			lipid.trans_axis_o_to_point(extrema, sph_coord[ii])

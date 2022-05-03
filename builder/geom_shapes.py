@@ -15,7 +15,7 @@ NOTE:    Intended improvements are denoted by the #%# flag.
 import mpl_toolkits.mplot3d.axes3d as ax3d
 import matplotlib.pyplot as plt
 import numpy as np
-
+import sympy as sp
 ''' Purpose:   To calculate the smallest angle between two vectors.
 	Arguments: (1) First vector.
                (2) Second vector.
@@ -94,6 +94,66 @@ def fib_sphere(num_points, radius = 1):
 	coord_list = [[x[ii], y[ii], z[ii]] for ii in range(0, len(x))]
 	
 	return coord_list
+
+def sun_radius(k, num_points, boundary_points):
+	if k > num_points - boundary_points:
+		r = 1
+	else:
+		r = np.sqrt(k - 0.5) / np.sqrt(num_points - (boundary_points + 1) / 2)
+	return r
+def sunflower(num_points, alpha, radius):
+	'''
+	Purpose   :     This function uses the sunflower distribution to evenly distribute
+			points within a circle of a given radius
+	Arguments :	1) Num_points --> points to be distributed
+			2) Alpha --> important for populating. 2 is smoother than 0
+			3) Radius --> use your brain dipshit
+	Returns   : List of lists of x,y coords. [[x0, y0]...[xn, yn]]
+	'''
+	boundary_points = round(alpha * np.sqrt(num_points))
+	phi = (np.sqrt(5) + 1) * 0.5
+	point_list = []
+	for k in list(range(1, num_points + 1)):
+		
+		r = sun_radius(k, num_points, boundary_points) * radius
+		theta = 2 * np.pi * k/phi**2
+		x, y = r * np.cos(theta), r * np.sin(theta)
+		point_list.append([x, y, 0])
+	return point_list
+def pro_circle(num_points, radius):
+	point_list = []
+	theta = np.linspace(0, 2*np.pi, num_points, endpoint=False)
+	
+	for angle in theta:
+		x = radius * np.cos(angle) 
+		y = radius * np.sin(angle)
+		point_list.append([x, y, 0])
+	return point_list
+
+def rectangle(num_points, length, width):
+	point_list = []
+	num_1 = num_points + 1 
+	s1 = np.floor(np.sqrt(num_points))
+	x_coords = np.linspace(0, int(length+s1),int( s1))
+	y_coords = np.linspace(0, int(width+s1), int(s1))
+	ii = 0
+	for coord in list(range(0, len(x_coords))):
+		jj = 0
+		for item in list(range(0, len(y_coords))):
+			x = x_coords[ii]
+			y = y_coords[jj]
+			point_list.append([x, y, 0])
+			jj += 1
+		ii += 1
+	
+	return point_list	
+	
+
+#rectangle(200,10, 4)	
+#print(sunflower(50,2,1))	
+
+
+
 
 '''--------------
 | Supplementary |
