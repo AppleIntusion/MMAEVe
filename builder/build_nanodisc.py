@@ -68,43 +68,49 @@ class Nanodisc(object):
 	
 	def struc_to_lines_composite(self):
 			
-		ii = 1 # Index variable to track the atom number.
-		jj = 1 # Index variable to track the residue number.
-		counter = 0
-		prot = 0
-		lip = 0	
-		index= 0
-		for unit in self.struc:
-			index = list(self.struc).index(unit)
+		atom_counter = 1 # Index variable to track the atom.
+		molecule_counter = 1 # Index variable to track molecule.
+		prot = -1 #tracks the iteration number for protein cycle
+		lip = 0	#tracks lipids
+		
+		for unit in self.struc: # Loops through each molecule in structure
 			
+					#### Count instances of protein and lipid in strucuture ####
 			elem = list(unit.atom_info.items())[0][0]
-			if unit.atom_info[elem].resn != "POC":
-				prot += 1	
+
+			if unit.atom_info[elem].resn != "POC": # checks if protein
+				prot += 1 	
 				end = list(unit.atom_info.items())[-1][0]	
 			
-			if unit.atom_info[elem].resn == "POC":
-				lip += 1	
+			if unit.atom_info[elem].resn == "POC": # checks if lipid
+				lip += 1
+
+					#### Loop Through every atom in molecule ####
 			for atom in unit.atom_info:
+			
+						#### Lipid ####
 				if unit.atom_info[atom].resn == "POC":
 					lipid_atom = unit.atom_info[atom]
-					lipid_atom = lipid_atom.to_pdb_file(atom_serial = str(ii), resn_seq = str(jj))
+					lipid_atom = lipid_atom.to_pdb_file(atom_serial = str(atom_counter), resn_seq = str(molecule_counter)) # count cycles, simple
 
 					self.lines.append(lipid_atom)
-				else:
-					
+
+						#### Protein ####
+				else:			
+						
 					atom_num = unit.atom_info[atom].serial
 					residue_num = unit.atom_info[atom].resi
-					print(residue_num)
 					protein_atom = unit.atom_info[atom]
-					#atom = atom.to_pdb_file(atom_serial = str(atom_num + unit.atom_info[end].serial * prot), resn_seq = str(residue_num + unit.atom_info[end].resi * prot))
-					protein_atom = protein_atom.to_pdb_file(atom_serial = str(ii), resn_seq = str(residue_num + lip + prot * unit.atom_info[end].resi))
+						
+					# Defines protein unit. Atom count is sequential and based on loop alone. Protein resi is found by multiplying
+					# the sum of lipid cycles and residue number; this sum is added to the product of the number of completed protein cycles and total residues 
+					# of one protein unit.
+					protein_atom = protein_atom.to_pdb_file(atom_serial = str(atom_counter), resn_seq = str(residue_num + lip + prot * unit.atom_info[end].resi))
 					self.lines.append(protein_atom)
-				ii += 1
+				atom_counter += 1
 				
 			self.lines.append("TER\n")
-			jj += 1
-			counter +=1
-		print(prot)	
+			molecule_counter += 1
 	def save_lines(self, file_name):
 		manf.write_file(file_name, self.lines)
 
@@ -299,16 +305,11 @@ class Nanodisc(object):
 			self.struc.append(protein)		
 
 
-	def build_protein_belt(self, protein, frac, radius, points):
+	def build_protein_belt(self, protein, frac, radius, protein_dist, points):
 		# Create a dictionary of lipid structures.
 		struc = dict()
 		for ii in range(0, len(protein)):
 			struc[ii] = manp.PdbFile(file_name = protein[ii]).to_protein()
-	#	protein = copy.deepcopy(struc[protein_id[0]])
-		#protein = copy.deepcopy(struc[0])
-		#self.struc.append(protein)		
-		#self.struc_to_lines_protein()
-		#self.save_lines(outfile)
 		# Number of entries to replace in each list.
 		pro_num = [int(prob * points) for prob in frac]
 
@@ -336,13 +337,6 @@ class Nanodisc(object):
 			# Increase ID so that it refelects the next structure ID.
 			pro_struc_id += 1
 	
-		#print(lipid_id)
-		#print(lipid_num)
-#		protein = copy.deepcopy(struc[protein_id[0]])
-#		self.struc.append(protein)		
-#		self.struc_to_lines_protein()
-#		self.save_lines(outfile)
-
 		# Coordinates on the surface of the sphere which lipids will be mapped to.
 		circ_coord = gs.pro_circle(points, radius)
 		for i in range(0, len(circ_coord)):
@@ -360,7 +354,7 @@ class Nanodisc(object):
 			
 			# Move lipids
 			protein.trans_axis_o_to_point(extrema, circ_coord[i])
-			protein.translate(t=[0,0, -5])
+			protein.translate(t=[0,0, protein_dist])
 			
 			self.struc.append(protein)		
 	def composite_nanodisc(self, lipids, frac, radius, lipid_points, protein_points, protein, outfile):
@@ -371,11 +365,12 @@ class Nanodisc(object):
 		self.struc_to_lines_composite()
 		self.save_lines(outfile)
 
-	def composite_nanodisc_belt(self, lipids, frac, radius, lipid_points, protein_points, protein, outfile):
+	def composite_nanodisc_belt(self, lipids, frac, radius, lipid_points, protein_points, protein, protein_layers, protein_dist, outfile):
 		
 		self.build_top_nanodisc(lipids, frac, radius, lipid_points)
 		self.build_bottom_nanodisc(lipids, frac, radius, lipid_points)
-		self.build_protein_belt(protein, frac, radius + 10, protein_points)
+		for i in list(range(0, protein_layers)):
+			self.build_protein_belt(protein, frac, radius + 10, protein_dist[i], protein_points)
 		self.struc_to_lines_composite()
 		self.save_lines(outfile)
 if __name__ == "__main__":
@@ -385,11 +380,11 @@ if __name__ == "__main__":
 	file_name = "/home/sanchezw/MMAEVe/builder/nano_test.pdb"
 	file_name2 = "/home/sanchezw/MMAEVe/builder/pep_test.pdb"
 	file_name3 = "/home/sanchezw/MMAEVe/builder/disc_test.pdb"
-	file_name4 = "/home/sanchezw/MMAEVe/builder/belt_test.pdb"
+	file_name4 = "/home/sanchezw/MMAEVe_1-1/builder/1belt_test.pdb"
 	
 	#nanodisc.build_nanodisc(["POC"], [1,0] , 100, 200,["apoa1_peptide"], file_name)
 #	nanodisc.build_protein(["../proteins/apoa1_peptide.pdb"], [1] , 100, 3, file_name2)				
 #	nanodisc.build_nanodisc(["POC"], [1,0] , 100, 200,["apoa1_peptide"], file_name2)
 #	nanodisc.composite_nanodisc(["POC"], [1], 100, 200, 30, ["../proteins/apoa1_peptide.pdb"], file_name3)
-	nanodisc.composite_nanodisc_belt(["POC"], [1], 100, 200, 15, ["../proteins/apoa1_peptide.pdb"], file_name4)
+	nanodisc.composite_nanodisc_belt(["POC"], [1], 100, 200, 15, ["../proteins/apoa1_peptide.pdb"], 2, [-30,-10], file_name4)
 
