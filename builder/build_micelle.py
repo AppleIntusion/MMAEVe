@@ -1,147 +1,124 @@
-'''
-Title:   Build Micelle
+'''-----------------------------------------------------*
+| Title:   Build Micelle                                |
+|                                                       |
+| Author:  Gubbin Eel (Satanic Overlord of the Swamp)   |
+|                                                       |
+| Purpose: Builds a micelle out of lipids.              |
+|                                                       |
+| NOTE:    Intended improvements are denoted by the #%# |
+|          flag. Searching for that flag will identify  |
+|          code that needs to be updated or will later  |
+|          be improved.                                 |
+*-----------------------------------------------------'''
 
-Author:  Gubbin Eel (Samuel Lindsay, East Carolina University)
+# Import program modules
+import manipulate_files as manf
+import geom_shapes      as gs
 
-Purpose: Builds a micelle out of lipids.
+from lipid_structure import lipidStructure
 
-NOTE:    Intended improvements are denoted by the #%# flag.
-         Searching for that flag will identify code that needs to be
-         updated or will later be improved.
-'''
-
-import manipulate_pdb      as manp
-import manipulate_files    as manf
-import molecule_structures as mols
-import geom_shapes         as gs
-
+# Import outside modules
 import numpy as np
 import copy
 
-class Micelle(object):
-	''' Has two lists as attributes. One is of lipid objects that make up the 
-	    structure. The other is a list of those lipids as strings in the 
-	    format of pdb file lines.
+class Micelle(lipidStructure):
+    ''' 
+    Description:
 
-		Attributes: struc and lines
-	'''
+        Child class of lipidStructure. The methods defined here
+        relate explicitly to building a micelle.
 
-	''' Initialize class instance.
-	'''
-	def __init__(self, struc = [], lines = []):
-		self.struc = struc
-		self.lines = lines
+    Attributes: 
+ 
+        See lipidStructure class attributes.
+    '''
 
-	''' Purpose:   Convert the struc attribute from a list of Lipid class
-	               objects to a list lists where each list contains the
-	               lines of the pdb file as strings. And assign it to the
-	               Micelle instance "lines" attribute.
-	    Arguments: (1) Micelle class instance specified using the class
-	                   method format.
-	'''
-	def struc_to_lines(self):
-		ii = 1 # Index variable to track the atom number.
-		jj = 1 # Index variable to track the residue number.
-		for lipid in self.struc:
-			for atom in lipid.atom_info:
-				atom = lipid.atom_info[atom]
-				atom = atom.to_pdb_file(atom_serial = str(jj), resn_seq = str(ii))
-				self.lines.append(atom)
-				jj += 1
-			self.lines.append("TER\n")
-			ii += 1
+    def __init__(self):
+        super().__init__()
 
-	''' Purpose:   To write the file lines in the "lines" attribute of a Micelle
-	               instance to a file.
-	    Arguments: (1) A Micelle instance specified in the class method format.
-	               (2) The name of the file to export the pdb structure to.
-	                   Specify the full path in the name.
-	'''
-	def save_lines(self, file_name):
-		manf.write_file(file_name, self.lines)
+    def add_lipids(self):
+        '''
+        Purpose:
+        Arguments:
+        Returns:
+        '''
+        ii = 0
+        for jj in self.leaf_1_ids:
+            # Copy Lipid.
+            lipid = copy.deepcopy(self.leaf_1_structures[jj])
+            # Points of the sphere to translate Lipid head to.
+            sphere_point = self.leaf_1_points[ii]
+            # Translate Lipid tail to the origin.
+            lipid.trans_axis_to_point([0., 0., 0.], "Tail")
+            # Align Lipid head with position vector.
+            lipid.align_axis_to_vec(sphere_point, "Head")
+            # Translate the lipid to the position on the sphere.
+            lipid.trans_axis_to_point(sphere_point, "Head")
+            # Add lipid to list
+            self.lipids.append(lipid)
+            ii += 1
 
-	''' Purpose:   Build a micelle of variable size and composition.
-	    Arguments: (1) A Micelle class object specified in the class method
-	                   format.
-	               (2) A list of strings. Each string is the lipid name or
-	                   abbreviation preceeding the ".pdb" suffix of structures in
-	                   the "lipids" folder.
-	               (3) A list of fractions correspoinding the the proportion
-	                   of each lipid present in the micelle. Must sum to 1.
-	               (4) Radius of the micelle. Float.
-	               (5) Number of lipids in the micelle. Integer.
-	               (6) The name of the output file with its full path specified.
-	'''
-	def build_micelle(self, lipids, frac, radius, points, outfile):
-		# Create a dictionary of lipid structures.
-		struc = dict()
-		for ii in range(0, len(lipids)):
-			struc[ii] = manp.PdbFile(lipid_name = lipids[ii]).to_lipid()
-
-		# Number of entries to replace in each list.
-		lipid_num = [int(prob * points) for prob in frac]
-
-		# A list of points containing the lipid ID to be placed at each
-		# point. When initialized it will contain only a single id.
-		lipid_id = [0 for ii in range(0, points)]
-
-		# A list from 0 to the number of lipids in the micelle. Represents the
-		# indicies of entries in the lipid_id list.
-		lipid_id_index = [ii for ii in range(0, points)]
-
-		# num_to_replace is the number of lipids to replace with a given lipid srtucture
-		# index, begining with the second index "1".
-		lip_struc_id = 1 # ID of the structure to replace.
-		for num_to_replace in lipid_num[1:]:
-			for ii in range(0, num_to_replace):
-				# Pick a random index from the lipid index list.
-				index = np.random.choice(lipid_id_index)
-				# Assign the structure ID to replace the default ID at a
-				# given index.
-				lipid_id[index] = lip_struc_id
-				# Remove the index from the list so that it cannot be used again.
-				lipid_id_index.remove(index)
-			# Increase ID so that it refelects the next structure ID.
-			lip_struc_id += 1
-
-		#print(lipid_id)
-		#print(lipid_num)
-
-		# Coordinates on the surface of the sphere which lipids will be mapped to.
-		sph_coord = gs.fib_sphere(points, radius = radius)
-		print(sph_coord)
-		for ii in range(0, len(sph_coord)):
-			# Copy of lipid
-			lipid = copy.deepcopy(struc[lipid_id[ii]])
-
-			# Determine which oxygen and hydrogen atom are farthest from each other. 
-			extrema = lipid.lipid_extrema()
-
-			# Translate the Lipid such that the position of the hydrogen extreme is 
-			# at the origin.
-			lipid.trans_axis_h_to_point(extrema, [0, 0, 0])
-
-			# Rotate lipid to align with the position vector on the sphere's surface.
-			lipid.align_axis_o_to_vec(extrema, sph_coord[ii])
-			
-
-			# Translate the lipid to the position on the sphere.
-			lipid.trans_axis_o_to_point(extrema, sph_coord[ii])
-
-			# Add lipid to list
-			self.struc.append(lipid)
-
-		# Convert familythe list of micelle lipids to a list of lists containing strings for 
-		# each atom.
-		self.struc_to_lines()
-
-		# Write the micelle to a file.
-		self.save_lines(outfile)
+    def add_proteins(self):
+        '''
+        Purpose:
+        Arguments:
+        Usage:
+        '''
+        ii = 0
+        for jj in self.protein_ids:
+            # Copy Protein.
+            protein = copy.deepcopy(self.protein_structures[jj])
+            # Points of the sphere to translate Protein head to.
+            sphere_point = self.protein_points[ii]
+            # Translate Protein tail to origin.
+            protein.trans_axis_to_point([0., 0., 0.], "Tail")
+            # Align Protein head with position vector.
+            protein.align_axis_to_vec(sphere_point, "Head")
+            # Translate the protein to the position on the sphere.
+            protein.trans_axis_to_point(sphere_point, "Head")
+            # Add protein to list.
+            self.proteins.append(protein)
+            ii += 1
 
 if __name__ == "__main__":
-	# Initialize Micelle class instance.
-	micelle = Micelle()
-
-	# Output file.
-	file_name = "/home/gubbin/Documents/mdProjects/programs/MMAEVe/lipids/test1.pdb"
-	micelle.build_micelle(["POC"], [1.0], 100, 800, file_name)
+    # Information about Lipid bilayer composition and proportions.
+    # Initialize Micelle class instance.
+    #*bilayer_comp = {"POC" : 0.7, "POS" : 0.1, 
+    #*                "PIP" : 0.1, "CHL" : 0.1}
+    bilayer_comp = {"POPC" : 0.6,  "POPS" : 0.2, 
+                    "CHOL" : 0.12, "POP2" : 0.08}
+    # Required information about the proteins present in the system.
+    #protein_comp = {"APO" : {"Fraction" : 1.0,
+    #                         "Head"     : "29-2-SER",
+    #                         "Tail"     : "316-19-ASN"}}
+    protein_comp = {"1W7B" : {"Fraction" : 1.0,
+                             "Head"     : "7-21-PRO",
+                             "Tail"     : "2081-281-LYS"}}
+    #protein_comp = {"COV" : {"Fraction" : 1.0,
+    #                         "Head"     : "3446-500-THR",
+    #                         "Tail"     : "16573-1147-SER"}}
+    micelle = Micelle()
+    # Add lipid structures and proportions.
+    micelle.collect_lipid_blocks(leaf_1 = bilayer_comp)
+    # Add protein structures and proportions.
+    #*micelle.collect_protein_blocks(proteins = protein_comp)
+    # Add lipid positions
+    micelle.generate_lipid_points(leaf_1_radius = 150, 
+                                  leaf_1_number = 7500, 
+                                  structure     = "Micelle")
+    # Add protein positions.
+    #*micelle.generate_protein_points(leaf_1_radius = 150,
+    #*                                leaf_1_number = 10,
+    #*                                structure     = "Micelle")
+    # Assign IDs to each of the points.
+    micelle.gen_ids()
+    # Build the micelle using specified parameters.
+    micelle.add_lipids()
+    # Add proteins to the Micelle system.
+    #*micelle.add_proteins()
+    # Remove any lipids that overlap with protein.
+    #*micelle.remove_overlap()
+    # Generate the file lines for the system.
+    micelle.struc_to_lines()
+    # Save the generate structure to a pdb file.
+    micelle.save_lines("test.pdb")
