@@ -122,17 +122,17 @@ def sunflower(num_points, radius, alpha = 2.0, height = 0.0):
         point_list.append([x, y, height])
     return point_list
 
-def pro_circle(num_points, radius):
+def circle(num_points, radius, height):
     point_list = []
     theta = np.linspace(0, 2 * np.pi, num_points, endpoint=False)
     
     for angle in theta:
         x = radius * np.cos(angle) 
         y = radius * np.sin(angle)
-        point_list.append([x, y, 0])
+        point_list.append([x, y, height])
     return point_list
 
-def rectangle(num_points, length, width, height = 0.0):
+def grid(num_points, length, width, height = 0.0):
     point_collection = []
 
     if num_points == 0:

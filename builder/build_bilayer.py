@@ -110,10 +110,10 @@ if __name__ == "__main__":
     Part I: Build the Bilayer with the specified concentration.
     '''
     # Information about Lipid bilayer composition and proportions.
-    leaf_1_comp = {"POPC" : 0.6,  "POPS" : 0.2, 
-                   "CHOL" : 0.12, "POP2" : 0.08}
-    leaf_2_comp = {"POPC" : 0.6,  "POPS" : 0.2, 
-                   "CHOL" : 0.12, "POP2" : 0.08}
+    leaf_1_comp = {"POPC" : 0.4,  "POPS" : 0.2, 
+                   "CHOL" : 0.12, "POP2" : 0.28}
+    leaf_2_comp = {"POPC" : 0.4,  "POPS" : 0.2, 
+                   "CHOL" : 0.12, "POP2" : 0.28}
     protein_comp = {"2POR" : {"Fraction" : 1.0,
                               "Head"     : "323-158-PHE",
                               "Tail"     : "521-256-THR"}}

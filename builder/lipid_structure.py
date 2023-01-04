@@ -156,26 +156,72 @@ class lipidStructure(object):
             pro.add_radius()
             self.protein_structures.append(pro)
 
-    def generate_points(self,                 leaf_1_radius = 10.0, 
-                        leaf_2_radius = 10.0, protein_radius = 10.0, 
-                        leaf_1_number = 10,   leaf_2_number = 10, 
-                        protein_number = 10,  width = 10.0, 
-                        pro_width = 10.0,     length = 10.0,
-                        pro_length = 10.0,    height = 10.0,         
-                        pro_height = 10.0,    structure = "Micelle"):
+    def generate_protein_points(self,                protein_radius = 10.0, 
+                                protein_number = 10, pro_width = 10.0,   
+                                pro_length = 10.0,   pro_height = 10.0,    
+                                structure = "Micelle"):
         '''
-        Purpose:   Assign lipid points for the various structures.
-        Arguments: 1) lipidStructure instance.
-                   2) Float. Radius of the Micelle, Vesicle outer 
-                      leaf, or Nanodisc Upper leaf.
-                   3) Float. Radius of the Vesicle inner leaf, or 
-                      Nanodisc lower leaf.
-                   4) Integer. Number of lipids in the the Micelle, 
-                      Vesicle outer leaf, or Nanodisc Upper leaf.
-                   5) Integer. Number of lipids in the the Micelle, 
-                      Vesicle outer leaf, or Nanodisc Upper leaf.
+        Purpose:   Assign protein points for the various structures.
+        Arguments: self) lipidStructure instance.
+                   protein_radius) Float. Radius of the sphere, 
+                   circular grid, or circle that proteins will be 
+                   placed on.
+                   protein_number) Integer. Number of points for 
+                   proteins to be placed at.
+                   pro_width) Float. Width of the rectangular gird
+                   for proteins to be placed on.
+                   pro_length) Float. Length of the rectangular grid
+                   that proteins will be placed on.
+                   pro_height) Float. Distance to shift protein 
+                   after placement on a circular or rectangular grid.
+                   structure) String. The shape of the point 
+                   distribution. Options include: "Sphere", "Disc", 
+                   "Grid", "Circle"
         Requires:  None
-        Modifies:  leaf_1_points, leaf_2_points, protein_points
+        Modifies:  protein_points
+        Returns:   None
+        '''
+        if structure == "Sphere":
+            protein_points = gs.fib_sphere(protein_number, 
+                                           protein_radius)
+        elif structure == "Disc":
+            protein_points = gs.sunflower(protein_number, 
+                                          protein_radius)
+        elif structure == "Circle":
+            protein_points = gs.circle(protein_number, 
+                                       protein_radius,
+                                       pro_height)
+        elif structure == "Grid":
+            protein_points = gs.grid(protein_number, pro_length,
+                                     pro_width, height = height)
+        self.protein_points = protein_points
+
+    def generate_lipid_points(self,                 leaf_1_radius = 10.0, 
+                              leaf_2_radius = 10.0, leaf_1_number = 10,   
+                              leaf_2_number = 10,   width = 10.0, 
+                              length = 10.0,        height = 10.0,         
+                              structure = "Micelle"):
+        '''
+        Purpose:   Assign protein points for the various structures.
+        Arguments: self) lipidStructure instance.
+                   leaf_1_radius) Float. The radius of the micelle,
+                   vesicle outer-leaf, or nanodisc upper-leaf.
+                   leaf_2_radius) Float. The radius of the vesicle 
+                   inner-leaf or nanodisc lower-leaf.
+                   leaf_1_number) Integer. The number of lipids in
+                   the vesicle outer-leaf or nanodisc upper-leaf.
+                   leaf_2_number) Integer. The number of lipids in
+                   the vesicle inner-leaf or nanodisc lower-leaf.
+                   width) Float. Width of a bilayer's upper and lower
+                   leaflets.
+                   length) Float. Length of a bilayer's upper and 
+                   lower leaflets.
+                   height) Float. How far to elevate the upper level
+                   of bilayer points above the lower bilayer points.
+                   structure) String. The structure that the 
+                   generated points should correspond to: 
+        Requires:  None
+        Modifies:  leaf_1_points, leaf_2_points 
         Returns:   None
         '''
         if structure == "Micelle":
@@ -183,96 +229,24 @@ class lipidStructure(object):
                                            leaf_1_radius)
             leaf_2_points  = gs.fib_sphere(leaf_2_number, 
                                            leaf_2_radius)
-            protein_points = gs.fib_sphere(protein_number, 
-                                           protein_radius)
         elif structure == "Vesicle":
             leaf_1_points  = gs.fib_sphere(leaf_1_number, 
                                            leaf_1_radius)
             leaf_2_points  = gs.fib_sphere(leaf_2_number, 
                                            leaf_2_radius)
-            protein_points = gs.fib_sphere(protein_number, 
-                                           protein_radius)
         elif structure == "Nanodisc":
             leaf_1_points  = gs.sunflower(leaf_1_number, 
                                           leaf_1_radius,
                                           height = height)
             leaf_2_points  = gs.sunflower(leaf_2_number, 
                                           leaf_2_radius)
-            protein_points = gs.sunflower(protein_number, 
-                                          protein_radius)
         elif structure == "Bilayer":
             leaf_1_points  = gs.rectangle(leaf_1_number, length,
                                           width, height = height)
             leaf_2_points  = gs.rectangle(leaf_2_number, length,
                                           width)
-            protein_points = gs.rectangle(protein_number, pro_length,
-                                          pro_width, height = height)
         self.leaf_1_points =  leaf_1_points
         self.leaf_2_points =  leaf_2_points
-        self.protein_points = protein_points
-
-    def generate_lipid_points(self,                leaf_1_radius = 0.0, 
-                              leaf_2_radius = 0.0, leaf_1_number = 0, 
-                              leaf_2_number = 0,   width = 0.0, 
-                              length = 0.0,        height = 0.0,
-                              structure = "Micelle"):
-        '''
-        Purpose:   Assign lipid points for the various structures.
-        Arguments: 1) lipidStructure instance.
-                   2) Float. Radius of the Micelle, Vesicle outer 
-                      leaf, or Nanodisc Upper leaf.
-                   3) Float. Radius of the Vesicle inner leaf, or 
-                      Nanodisc lower leaf.
-                   4) Integer. Number of lipids in the the Micelle, 
-                      Vesicle outer leaf, or Nanodisc Upper leaf.
-                   5) Integer. Number of lipids in the the Micelle, 
-                      Vesicle outer leaf, or Nanodisc Upper leaf.
-        Requires:
-        Modifies:
-        Returns:
-        '''
-        if structure == "Micelle":
-            self.leaf_1_points = gs.fib_sphere(leaf_1_number, 
-                                               leaf_1_radius)
-        elif structure == "Vesicle":
-            self.leaf_1_points = gs.fib_sphere(leaf_1_number, 
-                                               leaf_1_radius)
-            self.leaf_2_points = gs.fib_sphere(leaf_2_number, 
-                                               leaf_2_radius)
-        elif structure == "Nanodisc":
-            self.leaf_1_points = gs.sunflower(leaf_1_number, 
-                                              leaf_1_radius,
-                                              height = height)
-            self.leaf_2_points = gs.sunflower(leaf_2_number, 
-                                              leaf_2_radius)
-        elif structure == "Bilayer":
-            self.leaf_1_points = gs.rectangle(leaf_1_number, 
-                                              length,
-                                              width,
-                                              height = height)
-            self.leaf_2_points = gs.rectangle(leaf_2_number, 
-                                              length,
-                                              width)
-
-    def generate_protein_points(self, leaf_1_radius = 0.0, 
-                                leaf_2_radius = 0.0, leaf_1_number = 0, 
-                                leaf_2_number = 0, width = 0.0, 
-                                length = 0.0, height = 0.0,
-                                structure = "Micelle"):
-        if structure == "Micelle":
-            self.protein_points = gs.fib_sphere(leaf_1_number, 
-                                                leaf_1_radius)
-        elif structure == "Vesicle":
-            self.protein_points = gs.fib_sphere(leaf_1_number, 
-                                                leaf_1_radius)
-        elif structure == "Nanodisc":
-            self.protein_points = gs.sunflower(leaf_1_number, 
-                                               leaf_1_radius,
-                                               height = height)
-        elif structure == "Bilayer":
-            self.leaf_1_points = gs.rectangle(leaf_1_number, 
-                                              leaf_1_radius,
-                                              height = height)
 
     def remove_cylinder(self, axis_points):
         '''

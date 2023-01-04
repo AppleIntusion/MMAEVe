@@ -122,7 +122,7 @@ if __name__ == "__main__":
     # Build the vesicle using specified parameters.
     vesicle.add_lipids()
     # Add proteins to the Micelle system.
-    #vesicle.add_proteins()
+    vesicle.add_proteins()
     # Shift the proteins such that they will surround the 
     # vesicle.
     pc = 0
