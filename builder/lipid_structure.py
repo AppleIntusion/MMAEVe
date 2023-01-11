@@ -241,10 +241,10 @@ class lipidStructure(object):
             leaf_2_points  = gs.sunflower(leaf_2_number, 
                                           leaf_2_radius)
         elif structure == "Bilayer":
-            leaf_1_points  = gs.rectangle(leaf_1_number, length,
-                                          width, height = height)
-            leaf_2_points  = gs.rectangle(leaf_2_number, length,
-                                          width)
+            leaf_1_points  = gs.grid(leaf_1_number, length,
+                                     width, height = height)
+            leaf_2_points  = gs.grid(leaf_2_number, length,
+                                     width)
         self.leaf_1_points =  leaf_1_points
         self.leaf_2_points =  leaf_2_points
 

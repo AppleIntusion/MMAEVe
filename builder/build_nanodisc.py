@@ -1,8 +1,8 @@
 '''-----------------------------------------------------------*
 | Title:     Build Nanodisc                                   |
 |                                                             |
-| Author(s): Dumpster Monkey (Gaurdian of the Trailer Park)   |
-|            Gubbin Eel (Satanic Overlord of the Swamp)       |
+| Author(s): Gubbin Eel (Satanic Overlord of the Swamp)       |
+|            Dumpster Monkey (Gaurdian of the Trailer Park)   |
 |                                                             |
 | Purpose:   Builds a nanodisc out of lipids an small         |
 |            segments of scaffold protein.                    |
@@ -116,9 +116,9 @@ if __name__ == "__main__":
                    "CHOL" : 0.12, "POP2" : 0.28}
     leaf_2_comp = {"POPC" : 0.4,  "POPS" : 0.2, 
                    "CHOL" : 0.12, "POP2" : 0.28}
-    protein_comp = {"APO" : {"Fraction" : 1.0,
-                             "Head"     : "29-2-SER",
-                             "Tail"     : "313-19-ASN"}}
+    protein_comp = {"cAPO" : {"Fraction" : 1.0,
+                              "Head"     : "5-2-SER",
+                              "Tail"     : "40-19-ASN"}}
 
     nanodisc = Nanodisc()
 
