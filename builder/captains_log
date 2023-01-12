@@ -12,11 +12,11 @@ eyes out. A few long term goals are listed below:
     
     1) Attempt to use NumBa to increase performance. Maybe even
        to get the old girl running on a GPU.
-    2) Switch the pairwise distance search to one using a scipy
-       spatial KDTree.
     4) Switch to a numerically stable method for determining the
        angle between two vectors.
 
     Complete:
 
     3) Finish the lipid nanodisc.
+    2) Switch the pairwise distance search to one using a scipy
+       spatial KDTree.
