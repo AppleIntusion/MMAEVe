@@ -14,6 +14,7 @@ import geom_shapes      as gs
 # Import outside modules
 import numpy as np
 import copy
+import scipy
 
 
 class lipidStructure(object):
@@ -391,6 +392,42 @@ class lipidStructure(object):
         return np.insert(xyz_combined,   len(xyz_combined[0]), 
                          radii_combined, axis = 1)
 
+    def get_lipid_spatial_array(self):
+        '''
+        Purpose:   To get the xyz coordinates and atomic radius of 
+                   every Protein instance in a single N x 3 NP array. 
+                   Its intended purpose is to use when checking for 
+                   Lipid-Protein overlap. Since only Lipids will be 
+                   removed, protein coordinates do not need to be 
+                   updated.
+        Arguments: 1) lipidStructure instance.
+        Returns:   N x 5 NP Array of Floats. The first three floats
+                   represent the x, y, and z coordinates, 
+                   respectively, of a given atom. The fourth float
+                   represents the atomic radius. The fifth float
+                   is the index of the lipid.
+        '''
+        lipid_xyz    = []
+        lipid_radius = []
+        lipid_num    = []
+        ii = 0
+        for lipid in self.lipids:
+            lipid_xyz.append(lipid.xyz)
+            lipid_radius.append(lipid.radius)
+            lipid_num.append(lipid.radius - lipid.radius + ii)
+            ii += 1
+
+        lipid_xyz    = np.concatenate(lipid_xyz)
+        lipid_radius = np.concatenate(lipid_radius)
+        lipid_num    = np.concatenate(lipid_num)
+
+        lipid_info = np.insert(lipid_xyz, len(lipid_xyz[0]), 
+                               lipid_radius, axis = 1)
+        lipid_info = np.insert(lipid_info, len(lipid_info[0]), 
+                               lipid_num, axis = 1)
+
+        return(lipid_info)
+
     def remove_overlap(self):
         '''
         Purpose:   Remove any Lipid instances that overlap with 
@@ -403,32 +440,28 @@ class lipidStructure(object):
                    that's my hope). Thus, the goal is to correct for 
                    egregious Protein-Lipid overlap. Lipids being a 
                    little too close to each other is a different issue 
-                   entirely from having a lipid placed smack in the 
-                   center of a protein.
+                   entirely from having a protein placed smack in the 
+                   center of a membrane.
         Arguments: 1) lipidStructure instance.
         Returns:   None. Updates the lipidStructure instance.
         '''
+        # Generate protein coordinate KDTree lookup
         protein_spatial = self.get_protein_spatial_array()
         protein_xyz     = protein_spatial[:, 0:3]
-        protein_radii   = protein_spatial[:, 3]
-        to_remove       = []
-        ii = 0
-        for lipid in self.lipids:
-            for jj in range(len(lipid.serial)):
-                bond_distances = protein_radii + lipid.radius[jj]
-                distances      = np.linalg.norm(protein_xyz - \
-                                                lipid.xyz[jj, :],
-                                                axis = 1)
-                if True in set(distances <= bond_distances):
-                    to_remove.append(ii)
-                    break
-            ii += 1
-        self.lipids = np.delete(self.lipids, to_remove, axis = 0)
+        protein_lookup  = scipy.spatial.KDTree(protein_xyz)
 
+        # Generate lipid coordinate KDTree lookup
+        lipid_spatial = self.get_lipid_spatial_array()
+        lipid_xyz     = lipid_spatial[:, 0:3]
+        lipid_index   = lipid_spatial[:, 4]
+        lipid_lookup  = scipy.spatial.KDTree(lipid_xyz)
 
-'''
-Note from the Eel:
+        # Generate sparse distance matrix
+        sparse = protein_lookup.sparse_distance_matrix(lipid_lookup, 3.0, 
+                                                       output_type = "ndarray")
 
-300 lines deep in what should be a 15 line script and I haven't 
-checked if anything works yet.
-'''
+        # Remove lipids that overlap with proteins
+        hit_index     = list(set([dist[1] for dist in sparse]))
+        removal_index = list(set(lipid_index[hit_index]))
+        removal_index = [int(ii) for ii in removal_index]
+        self.lipids   = np.delete(self.lipids, removal_index, axis = 0)

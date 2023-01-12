@@ -141,6 +141,7 @@ if __name__ == "__main__":
 
     nanodisc.add_lipids()
     nanodisc.add_proteins()
+    nanodisc.remove_overlap()
 
     '''
     Part II: Save Structure
