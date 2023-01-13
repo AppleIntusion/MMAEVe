@@ -6,11 +6,6 @@
 |                                                             |
 | Purpose:   Builds a nanodisc out of lipids an small         |
 |            segments of scaffold protein.                    |
-|                                                             |
-| NOTE:      Intended improvements are denoted by the #%#     |
-|            flag. Searching for that flag will identify code |
-|            that needs to be updated or will later be        |
-|            improved.                                        |
 *-----------------------------------------------------------'''
 
 # Import program modules
@@ -39,9 +34,14 @@ class Nanodisc(ls.lipidStructure):
 
     def add_lipids(self):
         '''
-        Purpose:
-        Arguments:
-        Returns:
+        Purpose:   Adds members to the lipids attribute corresponding
+                   to the description that arises from the combination
+                   of other class attributes.
+        Arguments: self) Bilayer instance
+        Requires:  leaf_1_ids, leaf_1_structures, leaf_1_points, 
+                   leaf_2_ids, leaf_2_structures, leaf_2_points, 
+        Modifies:  lipids
+        Returns:   Nothing
         '''
         ii = 0
         for jj in self.leaf_1_ids:
@@ -81,9 +81,13 @@ class Nanodisc(ls.lipidStructure):
 
     def add_proteins(self):
         '''
-        Purpose:
-        Arguments:
-        Usage:
+        Purpose:   Adds members to the proteins attribute corresponding
+                   to the description that arises from the combination
+                   of other class attributes.
+        Arguments: self) Bilayer instance
+        Requires:  protein_ids, protein_structures, protein_points 
+        Modifies:  proteins
+        Returns:   Nothing
         '''
         ii = 0
         for jj in self.protein_ids:

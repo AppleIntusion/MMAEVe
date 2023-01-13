@@ -40,41 +40,43 @@ atomic_radii = {  'H' : 0.37, 'C' : 0.77, 'O' : 0.73, 'N' : 0.75,
 
 class Atom(object):
     '''
-    Description: Represent a single atom that is intended to be 
-                 a member of a more complex structure or molecule. 
-                 Contains important information needed to describe 
-                 atoms. As well as the basics for writing the major 
-                 molecular file-formats.
+    Description: 
+        Represent a single atom that is intended to be a member of a 
+        more complex structure or molecule. Contains important 
+        information needed to describe atoms. As well as the basics 
+        for writing the major molecular file-formats.
 
-    Attributes:  serial : Integer. Atom serial number. Common field in 
-                          most popular biomolecule formats.
-                 x      : Float. x-coordinate.
-                 y      : Float. y-coordinate.
-                 z      : Float. z-coordinate.
-                 mass   : Float. Atomic mass.
-                 elem   : String. Element name.
-                 name   : String. Atom name.
-                 resn   : String. Residue name. 
-                 resi   : Integer. Residue number.
+    Attributes:  
+        serial) Integer. Atom serial number. Common field in most 
+        popular biomolecule formats.
+        x) Float. x-coordinate.
+        y) Float. y-coordinate.
+        z) Float. z-coordinate.
+        mass) Float. Atomic mass.
+        elem) String. Element name.
+        name) String. Atom name.
+        resn) String. Residue name. 
+        resi) Integer. Residue number.
     '''
 
     def __init__(self,        serial = 0,  x = 0.,      y = 0., 
                  z = 0.,      mass = 0.,   resi = 0,    resn = "NA", 
                  chain = " ", elem = "NA", name = "NA", charge = 0.):
         ''' 
-        Purpose:    Initialize an Atom instance.
-        Arguments:  1) Integer. Atom serial number. Common field in 
-                       most populat biomolecule formats.
-                    2) Float. x-coordinate.
-                    3) Float. y-coordinate.
-                    4) Float. z-coordinate.
-                    5) Float. Atomic mass.
-                    6) Integer. Residue number.
-                    7) String. Residue name.
-                    8) String. Chain biomolecule belongs to.
-                    9) String. Elemental symbol of the atom.
-                   10) String. Atom name of residue.
-                   11) Charge. Charge on the atom.
+        Purpose:   Initialize an Atom instance.
+        Arguments: self) Atom instance.
+                   serial) Integer. Atom serial number. Common field 
+                   in most populat biomolecule formats.
+                   x) Float. x-coordinate.
+                   y) Float. y-coordinate.
+                   z) Float. z-coordinate.
+                   mass) Float. Atomic mass.
+                   resi) Integer. Residue number.
+                   resn) String. Residue name.
+                   chain) String. Chain biomolecule belongs to.
+                   elem) String. Elemental symbol of the atom.
+                   name) String. Atom name of residue.
+                   charge) Float. Charge on the atom.
         Returns:   Atom instance.
         '''
         self.serial = serial
@@ -97,7 +99,9 @@ class Atom(object):
                    2) List or other iterable. Should contain the 
                       x, y, and z values, respectively, that the
                       the molecule will be translated by.
-        Returns:   None
+        Requires:  Nothing
+        Modifies:  x, y, z
+        Returns:   Nothing
         '''
         self.x += t[0]
         self.y += t[1]
@@ -106,9 +110,11 @@ class Atom(object):
     def distance(self, other):
         ''' 
         Purpose:   Calculates the distance between two atoms.
-        Arguments: 1) Atom instance.
-                   2) Second instance of the Atom class.
-        Returns:   None
+        Arguments: self) Atom instance.
+                   other) Second instance of the Atom class.
+        Requires:  x, y, z
+        Modifies:  Nothing
+        Returns:   Float. The distance between two atoms.
         '''
         dist = (((self.x - other.x) ** 2)  +          \
                 ((self.y - other.y) ** 2)  +          \
@@ -121,10 +127,12 @@ class Atom(object):
                    points toward another atom.
         Arguments: 1) Atom instance.
                    2) Second instance of the Atom class.
-        Returns:   List. Contains the x, y, and z coordinates, 
-                   respectively of a distance vector pointing from the 
-                   current position to the position of another Atom 
-                   instance.
+        Requires:  x, y, z
+        Modifies:  Nothing
+        Returns:   List of Floats. Contains the x, y, and z 
+                   coordinates, respectively of a distance vector 
+                   pointing from the position of an Atom instance to 
+                   the position of another Atom instance.
         '''
         dist_vec = [other.x - self.x,
                     other.y - self.y,
@@ -135,10 +143,12 @@ class Atom(object):
         ''' 
         Purpose:   Generates a vector in the form of a list that 
                    points toward a point.
-        Arguments: 1) Atom instance.
-                   2) List or other iterable of Floats. Contains
-                      x, y, and z coordinates, respectively, of the 
-                      point to be translated to. 
+        Arguments: self) Atom instance.
+                   point) 1 x 3 List or other iterable of Floats. 
+                   Contains x, y, and z coordinates, respectively, of 
+                   the point to be translated to. 
+        Requires:  x, y, z
+        Modifies:  Nothing
         Returns:   List of Floats. Contains the x, y, and z 
                    coordinates, respectively, of a distance vector 
                    pointing from the current position of the Atom 
@@ -152,9 +162,11 @@ class Atom(object):
     def rot_x(self, thetax = 0.):
         ''' 
         Purpose:   Rotate an Atom object about the x-axis.
-        Arguments: 1) Atom instance.
-                   2) Float. Angle by which to rotate the atom, in 
-                      radians.
+        Arguments: self) Atom instance.
+                   thetax) Float. Angle by which to rotate the atom, 
+                   in radians.
+        Requires:  y, z
+        Modifies:  y, z
         Returns:   None
         '''
         y = self.y
@@ -165,9 +177,11 @@ class Atom(object):
     def rot_y(self, thetay = 0.):
         ''' 
         Purpose:   Rotate an Atom object about the y-axis.
-        Arguments: 1) Atom instance.
-                   2) Float. Angle by which to rotate the atom, in 
-                      radians.
+        Arguments: self) Atom instance.
+                   thetay) Float. Angle by which to rotate the atom, 
+                   in radians.
+        Requires:  x, z
+        Modifies:  x, z
         Returns:   None
         '''
         x = self.x
@@ -178,9 +192,11 @@ class Atom(object):
     def rot_z(self, thetaz = 0.):
         ''' 
         Purpose:   Rotate an Atom object about the z-axis.
-        Arguments: 1) Atom instance.
-                   2) Float. Angle by which to rotate the molecule, 
-                      in radians.
+        Arguments: self) Atom instance.
+                   thetay) Float. Angle by which to rotate the atom, 
+                   in radians.
+        Requires:  x, y
+        Modifies:  x, y
         Returns:   None
         '''
         x = self.x
@@ -192,7 +208,9 @@ class Atom(object):
         ''' 
         Purpose:   Retrieve the coordinates of an Atom object as a 
                    list.
-        Arguments: 1) Atom instance.
+        Arguments: self) Atom instance.
+        Requires:  x, y, z
+        Modifies:  Nothing
         Returns:   List of Floats. Contains the x, y, and z 
                    coordinates, respectively, of an atom.
         '''
@@ -202,15 +220,18 @@ class Atom(object):
                     chain = ''):
         ''' 
         Purpose:   Formats an Atom instance as a PDB file line.
-        Arguments: 1) Atom instance.
-                   2) Integer. The atom serial number. If it is '0'
-                      then the value already assigned will be used.
-                   3) Integer. The residue sequence number. If 
-                      it is 0 the value already assigned will be 
-                      used.
-                   4) String. Chain ID. Default is nothing.
-        Returns:   A string with all atom info specified in the
-                   proper .pdb format for an "ATOM" line.
+        Arguments: self) Atom instance.
+                   atom_serial) Integer. The atom serial number. If it 
+                   is '0' then the value already assigned will be 
+                   used.
+                   resn_seq) Integer. The residue sequence number. If 
+                   it is 0 the value already assigned will be used.
+                   chain) String. Chain ID. Default is nothing.
+        Requires:  serial, name, resn, resi, chain, x, y, z, elem, 
+                   charge
+        Modifies:  Nothing
+        Returns:   String. Formatted with all atom info specified in 
+                   the proper .pdb format for an "ATOM" line.
         '''
         # All the required entries for an ATOM field entry in a pdb 
         # file.
@@ -277,42 +298,38 @@ class Atom(object):
 
 class Molecule(object):
     '''
-    Description: Contains the constituent atoms of single molecule 
-                 along with relevant information for operations, 
-                 primarily writing various file formats and performing 
-                 spatial manipulation.    
+    Description: 
+        Contains the constituent atoms of single molecule along with 
+        relevant information for operations, primarily writing various 
+        file formats and performing spatial manipulations on the 
+        molecular coordinates.
 
-    Attributes:  serial)  N x 1 NP Array of Integers. Serial number
-                          of the atom.
-                 xyz)     N x 3 NP Array of Floats. x, y, and z
-                          coordinates of the atoms, respectively.
-                 mass)    N x 1 NP Array of Floats. Atomic masses
-                          of the atoms.
-                 resi)    N x 1 NP Array of Integers. The residue 
-                          numbers of the atoms.
-                 resn)    N x 1 NP Array of Strings. The residue
-                          name of the atoms.
-                 chain)   N x 1 NP Array of Strings. Contains the
-                          chain IDs of the atoms.
-                 elem)    N x 1 NP Array of Strings. Contains the
-                          elemental symbols of the atoms.
-                 name)    N x 1 NP Array of Strings. Contains the
-                          names of the atoms. 
-                 charge)  N x 1 NP Array of Floats. Contains the
-                          charge on each atom.
-                 radius)  N x 1 NP Array of Floats. Contains the
-                          atomic radii of the atoms.
-                 lookup)  Dictionary. Uses unique keys for the
-                          quick lookup of an atom of interest. The
-                          keys are built using the atom serial 
-                          numbers, residue numbers, and residue names
-                          seperated by '-'.
-                 extrema) Dictionary. Meant to contain the indicies
-                          of the information for the polar extrema
-                          of the molecule. Intended use is by the
-                          Lipid child class. It will store which atom
-                          is the "Tail" and which is the "Head" of
-                          the Lipid/Molecule. 
+    Attributes:  
+        serial) N x 1 NP Array of Integers. Serial number of the atom.
+        xyz) N x 3 NP Array of Floats. x, y, and z coordinates of the 
+        atoms, respectively.
+        mass) N x 1 NP Array of Floats. Atomic masses of the atoms.
+        resi) N x 1 NP Array of Integers. The residue numbers of the 
+        atoms.
+        resn) N x 1 NP Array of Strings. The residue name of the 
+        atoms.
+        chain) N x 1 NP Array of Strings. Contains the chain IDs of 
+        the atoms.
+        elem) N x 1 NP Array of Strings. Contains the elemental 
+        symbols of the atoms.
+        name) N x 1 NP Array of Strings. Contains the names of the 
+        atoms. 
+        charge) N x 1 NP Array of Floats. Contains the charge on 
+        each atom.
+        radius) N x 1 NP Array of Floats. Contains the atomic radii of 
+        the atoms.
+        lookup) Dictionary. Uses unique keys for the quick lookup of 
+        an atom of interest. The keys are built using the atom serial 
+        numbers, residue numbers, and residue names seperated by '-'.
+        extrema) Dictionary. Meant to contain the indicies of the 
+        information for the polar extrema of the molecule. Intended 
+        use is by the Lipid child class. It will store which atom is 
+        the "Tail" and which is the "Head" of the Lipid/Molecule. 
     '''
 
     def __init__(self,                   serial = np.array([]), 
@@ -324,29 +341,31 @@ class Molecule(object):
                  extrema = dict()):
         ''' 
         Purpose:   To initialize a Molecule instance.
-        Arguments: 1)  1 x N NP array of integers. The serial 
-                       numbers of the individual atoms.
-                   2)  3 x N NP array of floats. The x, y, and z
-                       coordinates, respectively, of the atoms.
-                   3)  1 x N NP array of floats. The masses of the
-                       atoms.
-                   4)  1 x N NP array of integers. The residue numbers
-                       of the atoms, (usually all the same within)
-                       a given smallish molecule.
-                   5)  1 x N NP array of strings. The residue name.
-                   6)  1 x N NP array of strings. The chain id.
-                   7)  1 x N NP array of strings. The element name.
-                   8)  1 x N NP array of strings. The atom names.
-                   9)  1 x N NP array of floats. Atomic charge.
-                   10) 1 x N NP array of floats. Atomic radii.
-                   11) Dictionary. Dictionary with the key as a
-                       combination of the residue name, number, and
-                       atom number.
-                   12) Dictionary. Dictionary with two keys "Head"
-                       and "Tail". These provide the index of the
-                       atoms which serve correspond to the 
-                       orientation of a Lipid's head and tail in a
-                       biological membrane.
+        Arguments: self) Molecule instance.
+                   serial) 1 x N NP array of integers. The serial 
+                   numbers of the individual atoms.
+                   xyz) 3 x N NP array of floats. The x, y, and z 
+                   coordinates, respectively, of the atoms.
+                   mass) 1 x N NP array of floats. The masses of the 
+                   atoms.
+                   resi) 1 x N NP array of integers. The residue 
+                   numbers of the atoms, (usually all the same within) 
+                   a given smallish molecule.
+                   resn) 1 x N NP array of strings. The residue name.
+                   chain) 1 x N NP array of strings. The chain id.
+                   elem) 1 x N NP array of strings. The element name.
+                   name) 1 x N NP array of strings. The atom names.
+                   charge) 1 x N NP array of floats. Atomic charge.
+                   radius) 1 x N NP array of floats. Atomic radii.
+                   lookup) Dictionary. Dictionary with the key as a 
+                   combination of the residue name, number, and atom 
+                   number.                   
+                   extrema) Dictionary. Dictionary with two keys 
+                   "Head" and "Tail". These provide the index of the 
+                   atoms which serve correspond to the orientation of 
+                   a Lipid's head and tail in a biological membrane.
+        Requires:  Nothing
+        Modifies:  All
         Returns:   Molecule instance.
         '''
         self.serial  = serial
@@ -366,12 +385,14 @@ class Molecule(object):
         ''' 
         Purpose:   Translates a molecule in the x, y, and z directions
                    using a provided list.
-        Arguments: 1) Molecule instance.
-                   2) 1 x 3 NP Array or other iterable. Contains 
-                      coordinates of the x, y, and z positions, 
-                      respectively. Describes a vector used to 
-                      translate the molecule.
-        Returns:   None. Updates Molecule instance.
+        Arguments: self) Molecule instance.
+                   t) 1 x 3 NP Array or other iterable. Contains 
+                   coordinates of the x, y, and z positions, 
+                   respectively. Describes a vector used to translate 
+                   the molecule.
+        Requires:  Nothing
+        Modifies:  xyz
+        Returns:   Nothing. Updates Molecule instance.
         '''
         self.xyz += t
 
@@ -379,10 +400,13 @@ class Molecule(object):
         ''' 
         Purpose:   To rotate a molecule by a specified amount around 
                    either the x, y, or z-axis.
-        Arguments: 1) Molecule instance.
-                   2) String. The axis to rotate about: 'x', 'y', 
-                      or 'z'. 
-                   3) Float. How far to rotate, in radians; default of 0.
+        Arguments: self) Molecule instance.
+                   axis) String. The axis to rotate about: 'x', 'y', 
+                   or 'z'. 
+                   theta) Float. How far to rotate, in radians; 
+                   default of 0.
+        Requires:  xyz
+        Modifies:  xyz
         Returns:   None. Updates Molecule instance.
         '''
         if axis == 'x':
@@ -414,11 +438,14 @@ class Molecule(object):
         '''
         Purpose:   Converts a molecule to a list of strings formatted
                    for a pdb file.
-        Arguments: 1) Molecule instance.
-                   2) The starting number for numbering atoms.
-                   3) The residue number.
-        Returns:   List containing strings for each of the atoms of 
-                   the molecule formatted as pdb lines.
+        Arguments: self) Molecule instance.
+                   atom_start) The starting number for numbering 
+                   atoms.
+                   res_num) The residue number.
+        Requires:  serial, name, resn, chain, xyz, elem, charge
+        Modifies:  Nothing
+        Returns:   List of Strings. Contains strings for each of the 
+                   atoms of the molecule formatted as pdb lines.
         '''
         record_name   = np.array(["ATOM" for ii in self.serial])
         serial = np.arange(atom_start, 
@@ -480,13 +507,15 @@ class Molecule(object):
         pdb_lines = np.char.add(pdb_lines, '\n')
         pdb_lines = pdb_lines.tolist()
 
-        return pdb_lines
+        return(pdb_lines)
 
     def add_mass(self):
         '''
         Purpose:   Add atomic masses to Molecule instance.
-        Arguments: 1) Molecule instance.
-        Returns:   None. Updates Molecule instance.
+        Arguments: self) Molecule instance.
+        Requires:  elem
+        Modifies:  mass
+        Returns:   Nothing
         '''
         self.mass = np.array([atomic_masses[elem]    \
                              for elem in self.elem])
@@ -494,7 +523,9 @@ class Molecule(object):
     def add_radius(self):
         '''
         Purpose:   Add atomic radii to Molecule instance.
-        Arguments: 1) Molecule instance.
+        Arguments: self) Molecule instance.
+        Requires:  elem
+        Modifies:  radius
         Returns:   None. Updates Molecule instance.
         '''
         #try:
@@ -508,10 +539,12 @@ class Molecule(object):
         
     def generate_lookup(self):
         '''
-        Purpose:   Generate a dictionary for looking up an
+        Purpose:   Generate/update the dictionary for looking up an 
                    atom's index.
-        Arguments: 1) Molecule instance.
-        Returns:   None. Updates Molecule instance.
+        Arguments: self) Molecule instance.
+        Requires:  serial, resi, resn
+        Modifies:  lookup
+        Returns:   Nothing
         '''
         for ii in range(len(self.serial)):
             key = str(int(self.serial[ii])) + '-' + \
@@ -521,9 +554,13 @@ class Molecule(object):
 
 class Lipid(Molecule):
     '''
-    Inherits Molecule class. Largely similar to the Molecule class
-    all new methods are related to orienting Lipid instances within 
-    a given structure.
+    Description:
+        Inherits Molecule class. Largely similar to the Molecule class.
+        New methods are related to orienting Lipid instances within 
+        a given structure.
+
+    Attributes:
+        See the Molecule class description.
     '''
 
     def lipid_extrema(self): 
@@ -531,8 +568,12 @@ class Lipid(Molecule):
         Purpose:   Determines which atoms/beads should be used as the 
                    head and tail ends of the Lipid. These atoms are 
                    used for aligning the Lipids when building the 
-                   various structures.
-        Arguments: 1) Lipid instance.
+                   various structures. Information is stored as a 
+                   Dictionary in the extrema attribute.
+        Arguments: self Lipid instance.
+        Requires:  name, xyz
+        Modifies:  extrema
+        Returns:   Nothing
         '''
         # List to hold Atom class instances for negative atoms/beads.
         head_atoms = [] 
@@ -574,15 +615,16 @@ class Lipid(Molecule):
 
     def trans_axis_to_point(self, point, axis_member):
         ''' 
-        Purpose:   Translate the head atom of a Lipid to a point.
-        Arguments: 1) Lipid instance.
-                   2) 1 x 3 NP array of floats. Contains the x, y,
-                      and z coordinates, respectively, of the 
-                      point that the Tail atom should be translated 
-                      to.
-                   3) String. The name of the axis member to rotate,
-                      "Head" or "Tail".
-        Returns:   None
+        Purpose:   Translate either the Lipid head of tail to a point.
+        Arguments: self) Lipid instance.
+                   point) 1 x 3 NP array of floats. Contains the x, y, 
+                   and z coordinates, respectively, of the point that 
+                   the Head or Tail should be translated to.
+                   axis_member) String. The name of the axis member to 
+                   translate to the piont, "Head" or "Tail".
+        Requires:  extrema, xyz
+        Modifies:  xyz  
+        Returns:   Nothing
         '''
         # Get axis extreme, either Head or Tail.
         extreme = self.extrema[axis_member]
@@ -593,12 +635,17 @@ class Lipid(Molecule):
 
     def align_axis_to_vec(self, point, axis_member):
         ''' 
-        Purpose:   Align a Lipid with a given position vector. The 
-                   axis head atom remains in its current position. 
-        Arguments: 1) Lipid instance.
-                   2) 1 x 3 NP Array. Position vector to align to.
-                   3) String. The name of the axis member to rotate,
-                      "Head" or "Tail".
+        Purpose:   To rotate one extrema member, either "Head" or 
+                   "Tail", while holding the other fixed such that the 
+                   member being rotated lands on the position vector 
+                   specified by the point.
+        Arguments: self) Lipid instance.
+                   point) 1 x 3 NP Array. Position vector to align to.
+                   axis_member) String. The name of the axis member to 
+                   rotate, "Head" or "Tail".
+        Requires:  xyz
+        Modifies:  xyz
+        Returns:   Nothing
         '''
         # Perform a rotation about each axis to align with the vector.
         # The rotation is performed by projecting along the rotation
@@ -650,8 +697,8 @@ class Lipid(Molecule):
         # of it. Though I hope for the former as the "Dumpster 
         # Monkey's Paw" phenomenon can be difficult to deal with; 
         # Dumpster Monkey will usually put out one fire only to 
-        # light a dozen more in its place. Dumpter Monkey code is 
-        # also always fucking uncommented.
+        # light a dozen more in its place.
+
         # z-axis rotation.#
         sphere_vec = [point[0], point[1], 0]#
         lipid_vec  = [self.xyz[extreme, 0], #
@@ -669,36 +716,55 @@ class Lipid(Molecule):
  
 class Residue(Molecule):
     '''
-    Inherits Molecule class.
+    Description:
+        Extension of the molecule class. Used to represent Protein 
+        Residues in a syntactically distinct manner from Molecules 
+        which is meant to represent plain old molecules.
+    
+    Attributes:
+        See the description in the Molecule class.
     '''
     pass
 
 class Protein(object):
     '''
-    Stores all of the information related to importing proteins
+    Description:
+        Used to represent a proteins structure. Defines methods for 
+        spatial manipulation and conversion to a .pdb file.
 
-    Attributes: An NP array containing the constituent Residue 
-                instances of the protein.
+    Attributes: 
+        residues) N x 1 NP Array of Residue instances. Contains the 
+        residues of the protein as Residue instances. Otherwise, an 
+        empty NP Array is assigned.
+        extrema) Dictionary. Contains information about the extrema of 
+        the protein structure. They are not, in-fact, extrema. They 
+        are user-specified atoms. The naming convention is kept 
+        because the user-specified "Head" and "Tail" are aligned with 
+        the head and tail of the Lipid instances for each structure. 
+        The key is either "Head" or "Tail" and the stored value is a 
+        list or other iterable with two values. The first being the 
+        residue index and the second being the atom index within the 
+        residue.
     '''
-
     def __init__(self, residues = np.array([]), 
                  extrema = dict()):
         '''
-        Purpose:   Initiate an instance of the Protein class.
-        Arguments: 1) N x 1. Containing the residues of the protein
-                      as Residue instances. Otherwise, an empty list
-                      is assigned.
-                   2) Dictionary. Contains information about the 
-                      extrema of the protein structure. They are not, 
-                      in-fact, extrema. They are user-specified atoms. 
-                      The naming convention is kept because the 
-                      user-specified "Head" and "Tail" are aligned 
-                      with the head and tail of the Lipid instances 
-                      for each structure. The key is either "Head" or
-                      "Tail" and the stored value is a list or other
-                      iterable with two values. The first being the
-                      residue index and the second being the atom
-                      index within the residue.
+        Purpose:   Initialize an instance of the Protein class.
+        Arguments: self) Protein instance.
+                   residues) N x 1 NP Array of Residue instances. 
+                   Contains the residues of the protein as Residue 
+                   instances. Otherwise, an empty NP Array is 
+                   assigned.
+                   extrema) Dictionary. Contains information about the  
+                   extrema of the protein structure. They are not, 
+                   in-fact, extrema. They are user-specified atoms. 
+                   The naming convention is kept because the  
+                   user-specified "Head" and "Tail" are aligned with 
+                   the head and tail of the Lipid instances for each 
+                   structure. The key is either "Head" or "Tail" and 
+                   the stored value is a list or other iterable with 
+                   two values. The first being the residue index and 
+                   the second being the atom index within the residue.
         Returns:   Protein instance.
         '''
         self.residues = residues
@@ -708,11 +774,13 @@ class Protein(object):
         ''' 
         Purpose:   Translates a Protein instance in the x, y, and z 
                    directions using a provided vector.
-        Arguments: 1) Protein instance.
-                   2) 1 x 3 NP Array. Contains three floats, x, y, 
+        Arguments: self) Protein instance.
+                   t) 1 x 3 NP Array. Contains three floats, x, y, 
                       and z, respectively, defining a direction
                       vector for translating the Protein instance.
-        Returns:   None, updates Protein instance.
+        Requires:  residues
+        Modifies:  residues
+        Returns:   Nothing
         '''
         for res in self.residues:
             res.translate(t)
@@ -721,11 +789,14 @@ class Protein(object):
         ''' 
         Purpose:   To rotate a Protein by a specified amount around 
                    either the x, y, or z-axis.
-        Arguments: 1) Protein instance.
-                   2) String. The axis to rotate about: 'x', 'y', 
-                      or 'z'. 
-                   3) Float. How far to rotate, in radians; default of 0.
-        Returns:   None. Updates Protein instance.
+        Arguments: self) Protein instance.
+                   axis) String. The axis to rotate about: 'x', 'y', 
+                   or 'z'. 
+                   theta) Float. How far to rotate, in radians; 
+                   default of 0.
+        Requires:  residues
+        Modifies:  residues
+        Returns:   Nothing
         '''
         for res in self.residues:
             res.rotate(axis = axis, theta = theta)
@@ -739,18 +810,20 @@ class Protein(object):
                    from the fact that the selected atoms will
                    be aligned with the Lipid head and tail 
                    orientations, respectively.
-        Arguments: 1) Protein instance.
-                   2) String. Head atom's serial number, residue
-                      number, and residue name, seperated by
-                      dashed. For example, '80054-911-DID', where 
-                      '80054' is the serial number, '911' is the 
-                      residue number, and 'DID' is the residue name.
-                   3) String. Tail atom's serial number, residue
-                      number, and residue name, seperated by
-                      dashed. For example, '420-69-VAG' where '420'
-                      is the atom serial number, '69' is the 
-                      residue number, and 'VAG' is the residue name.
-        Returns:   None
+        Arguments: self) Protein instance.
+                   head_id) String. Head atom's serial number, residue
+                   number, and residue name, seperated by
+                   dashes. For example, '80054-911-DID', where 
+                   '80054' is the serial number, '911' is the 
+                   residue number, and 'DID' is the residue name.
+                   tail_id) String. Tail atom's serial number, residue
+                   number, and residue name, seperated by
+                   dashed. For example, '420-69-VAG' where '420'
+                   is the atom serial number, '69' is the 
+                   residue number, and 'VAG' is the residue name.
+        Requires:  residues
+        Modifies:  extrema
+        Returns:   Nothing
         '''
         res_number   = 0
         for res in self.residues:
@@ -766,13 +839,16 @@ class Protein(object):
 
     def trans_axis_to_point(self, point, axis_member):
         ''' 
-        Purpose:   Translate the tail atom of a Lipid to a point.
-        Arguments: 1) Protein instance.
-                   2) 1 x 3 NP Array. Contains the x, y, and z 
-                      coordinates, respectively, of the point that 
-                      Tail atom should be translated to.
-                   3) String. The name of the axis member to rotate,
-                      "Head" or "Tail".
+        Purpose:   Translate either the tail or head atom of a Lipid 
+                   to a point.
+        Arguments: self) Protein instance.
+                   point) 1 x 3 NP Array. Contains the x, y, and z 
+                   coordinates, respectively, of the point that Tail 
+                   atom should be translated to.
+                   axis_member) String. The name of the axis member to 
+                   rotate, "Head" or "Tail".
+        Requires:  extrema, residues
+        Modifies:  residues
         Return:    None. Updates Protein instance.
         '''
         # Get axis extreme, either Head or Tail.
@@ -787,13 +863,16 @@ class Protein(object):
     def align_axis_to_vec(self, point, axis_member):
         ''' 
         Purpose:   Align a Protein with a given position vector with 
-                   the axis tail atom remaining in its current 
-                   position. 
-        Arguments: 1) Lipid instance.
-                   2) 1 x 3 NP Array. Contains the x, y, and z 
-                      coordinates, respectively, of the position 
-                   3) String. The name of the axis member to rotate,
-                      "Head" or "Tail".
+                   either the tail or head atom remaining in its 
+                   current position. 
+        Arguments: self) Lipid instance.
+                   point) 1 x 3 NP Array. Contains the x, y, and z 
+                   coordinates, respectively, of the position 
+                   axis_member) String. The name of the axis member to 
+                   rotate, "Head" or "Tail".
+        Requires:  extrema, xyz
+        Modifies:  xyz
+        Returns:   Nothing
         '''
         # Perform a rotation about each axis to align with the vector.
         # The rotation is performed by projecting along the rotation
@@ -836,12 +915,14 @@ class Protein(object):
     def to_pdb_file(self, atom_start = 1, resi_start = 1):
         '''
         Purpose:   Converts a Protein to a List of Strings formatted
-                   to be written as a pdb file.
-        Arguments: 1) Protein instance.
-                   2) Integer. Starting number for numbering atoms
-                      in the .pdb file.
-                   3) Integer. Starting number for numbering residues
-                      in the .pdb file.
+                   as the lines of a pdb file.
+        Arguments: self) Protein instance.
+                   atom_start) Integer. Starting number for numbering 
+                   atoms in the .pdb file.
+                   resi_start) Integer. Starting number for numbering 
+                   residues in the .pdb file.
+        Requires:  residues
+        Modifies:  Nothing
         Returns:   List of Strings. Contains the atoms of the molecule 
                    formatted as pdb lines.
         '''
@@ -860,8 +941,10 @@ class Protein(object):
         '''
         Purpose:   Add atomic masses to Residues of a  Protein 
                    instance.
-        Arguments: 1) Protein instance.
-        Returns:   None. Updates Protein instance.
+        Arguments: self) Protein instance.
+        Requires:  residues
+        Modifies   residues
+        Returns:   Nothing
         '''
         for res in self.residues:
             res.add_mass()
@@ -869,8 +952,10 @@ class Protein(object):
     def add_radius(self):
         '''
         Purpose:   Add atomic radii to Protein instance.
-        Arguments: 1) Protein instance.
-        Returns:   None. Updates Protein instance.
+        Arguments: self) Protein instance.
+        Requires:  residues
+        Modifies:  residues
+        Returns:   Nothing
         '''
         for res in self.residues:
             res.add_radius()
@@ -880,8 +965,10 @@ class Protein(object):
         Purpose:   Generate a dictionary for looking up an
                    atom's index for each of the Residues in
                    a Protein instance.
-        Arguments: 1) Protein instance.
-        Returns:   None. Updates Protein instance.
+        Arguments: self) Protein instance.
+        Requires:  residues
+        Modifies:  residues
+        Returns:   Nothing
         '''
         for ii in range(len(self.residues)):
             res = copy.deepcopy(self.residues[ii])
@@ -896,11 +983,3 @@ if __name__ == "__main__":
     lipid.rotate(axis = 'x', theta = 2.3)
     lines = lipid.to_pdb_lines()
     manf.write_file("test.pdb", lines)
-    
-    
-        
-'''
-Note from the Eel:
-
-Quit biomolecular modelling while you're still sane.
-'''

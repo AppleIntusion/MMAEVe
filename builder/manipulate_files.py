@@ -7,10 +7,6 @@
 |          files. This includes general functions for working |
 |          with any file/file-type as well as specific file-  |
 |          types such as pdb files.                           |
-|                                                             |
-| NOTE:    Intended improvements are denoted by the #%# flag. |
-|          Searching for that flag will identify code that    |
-|          needs to be updated or will later be improved.     |
 *-----------------------------------------------------------'''
 
 import molecule_structures as mols
@@ -23,7 +19,9 @@ def import_file_contents(file):
     ''' 
     Purpose:   Return the contents of a file as a list of strings.
 
-    Arguments: (1) The name of a file with its full path.
+    Arguments: file) String. The name of a file with its path, if 
+               required.
+    Returns:   The lines of the file as a list of strings.
     '''
     with open(file, 'r') as f:
         contents = f.readlines()
@@ -32,10 +30,11 @@ def import_file_contents(file):
 def write_file(file, file_list):
     ''' 
     Purpose:   Write a list of strings to a file.
-
-    Arguments: (1) The name of a file with its full path.
-               (2) A list containing strings representing the lines
-                   of each file to be written.
+    Arguments: file) String. The name of the output file with its 
+               full path, if required.
+               file_list) List of strings. A list containing strings
+               representing the lines of each file to be written.
+    Returns:   Nothing. Writes a file.
     '''
     with open(file, 'w') as f:
         for line in file_list:
@@ -43,13 +42,50 @@ def write_file(file, file_list):
 
 class PdbFile():
     '''
-    #%# Description of the class.
-    
+    Description:
+        Used to store all the information found within a PDB file as
+        an object that can be manipulated in various ways. Most 
+        importantly, the pdb file can be converted to an instance of 
+        the Lipid or Protein class.
+
+    Attributes: 
+        record_name) PDB record field.
+        serial) PDB ATOM record field: Atom serial number.
+        atom_name) PDB ATOM record field: Atom name.
+        alternate_loc) PDB ATOM record field: Alternate location 
+        indicator.
+        residue_name) PDB ATOM record field: Residue name.
+        chain) PDB ATOM record field: Chain identifier.
+        residue_num) PDB ATOM record field: Residue sequence number.
+        insertion) PDB ATOM record field: Insertion code.
+        x) PDB ATOM record field: x-coordinate.
+        y) PDB ATOM record field: y-coordinate.
+        z) PDB ATOM record field: z-coordinate.
+        occupancy) PDB ATOM record field: Occupancy.
+        temp_fac) PDB ATOM record field: Temperature factor.
+        element) PDB ATOM record field: Element symbol.
+        charge) PDB ATOM record field: Charge.
+        line) Original PDB file lines.
     '''
 
     #%# Update to include a count of file lines and fields. At the
     #   moment I just need it to import ATOM information.
-    def __init__(self, file_name = "None", lipid_name = "None", protein_name = "None"):
+    def __init__(self, file_name = "None", lipid_name = "None", 
+                 protein_name = "None"):
+        ''' 
+        Purpose:   Initialize an instance of the PdbFile class for
+                   use. It's bad practice but it currently requires
+                   that one of the optional arguments be provided 
+                   else it will return an error. It will read the
+                   provided file, assuming it is a PDB file and 
+                   collect any required information.
+        Arguments: self) PdbFile instance.
+                   file_name) String. Name of the file to import with 
+                   the full path, if needed (not in same directory).
+                   lipid_name) Name of the lipid to import. A
+                   protein_name)
+        Returns:   PdbFile instance.
+        '''
         ###LIPID MANIPULATION###
         self.record_name   = np.array([])
         self.serial        = np.array([])
@@ -140,7 +176,8 @@ class PdbFile():
                                          line[13].strip(wspc))
                 try:
                     float(line[14].strip(wspc))
-                    self.charge = np.append(self.charge, float(line[14].strip(wspc)))
+                    self.charge = np.append(self.charge, 
+                                            float(line[14].strip(wspc)))
                 except ValueError:
                     line[14] = ''
                     self.charge = np.append(self.charge, '')
@@ -149,26 +186,33 @@ class PdbFile():
 
     def to_lipid(self):
         ''' 
-        Purpose:   Take a PdbFile class instance and convert it to a Lipid
-                   class instance.
-        Arguments: (1) Takes one argument and 
+        Purpose:   Take a PdbFile class instance and convert it to a 
+                   Lipid class instance.
+        Arguments: self) PdbFile instance.
+        Returns:   Lipid instance.
         '''
         x = np.transpose(np.array([self.x]))
         y = np.transpose(np.array([self.y]))
         z = np.transpose(np.array([self.z]))
         xyz = np.concatenate([x, y, z], axis = 1)
-        return mols.Lipid(serial = self.serial,       xyz    = xyz, 
-                          mass   = np.array([]),      resi   = self.residue_num, 
-                          resn   = self.residue_name, chain  = self.chain, 
-                          elem   = self.element,      name   = self.atom_name, 
-                          charge = self.charge,       lookup = dict())
+        return mols.Lipid(serial = self.serial,       
+                          xyz    = xyz, 
+                          mass   = np.array([]),      
+                          resi   = self.residue_num, 
+                          resn   = self.residue_name, 
+                          chain  = self.chain, 
+                          elem   = self.element,      
+                          name   = self.atom_name, 
+                          charge = self.charge,       
+                          lookup = dict())
 
 
     def to_protein(self):
         ''' 
-        Purpose:   Take a PdbFile instance and convert it to a Protein
-                   instance.
-        Arguments: (1) Takes one argument and 
+        Purpose:   Take a PdbFile class instance and convert it to a Protein
+                   class instance.
+        Arguments: self) PdbFile instance.
+        Returns:   Protein instance.
         '''
         residues = []
         start = 0
@@ -212,10 +256,3 @@ if __name__ == "__main__":
     #for res in pro.residues:
     #    for atom in res:
     #        print(res[atom].serial, ' ', res[atom].resi)
-
-'''
-Note from the Eel:
-
-I keep rewriting the same script for reading/writing pdb files
-because I always lose the original.
-'''

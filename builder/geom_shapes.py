@@ -8,27 +8,27 @@
 |          sphere, or two rectangles.                     |
 *-------------------------------------------------------'''
 
+# Import required modules
 import numpy as np
 
-''' Purpose:   To calculate the smallest angle between two vectors.
-    Arguments: (1) First vector.
-               (2) Second vector.
-               (3) Units which the angle value are returned in. The
-                   default is 'rad' for radians and the other option is
-                   'deg' for degrees.
-'''
-def vec_angle(v1, v2, units='rad'):
+def vec_angle(v1, v2, units = 'rad'):
+    ''' 
+    Purpose:   To calculate the smallest angle between two vectors.
+    Arguments: v1) 1 x 3 NP Array or list-like. First vector.
+               v2) 1 x 3 NP Array or list-like. Second vector.
+               units) String. Units which the angle value are returned 
+               in. The default is 'rad' for radians and the other 
+               option is 'deg' for degrees.
+    Returns:   Float. Value of the angle in either degrees or radians 
+               as specified by the user.
+    '''
     np.seterr(all = 'raise')
-    #try:
-    #if (v1[0] == v1[1] == v1[2] == 0) or (v2[0] == v2[1] == v2[2] == 0):
-    #else:
+
     angle = np.dot(np.array(v1), np.array(v2))
-    angle = angle / (np.linalg.norm(np.array(v1)) * np.linalg.norm(np.array(v2)))
+    angle = angle / (np.linalg.norm(np.array(v1)) * \
+                     np.linalg.norm(np.array(v2)))
     angle = round(angle, 10)
     angle = np.arccos(angle)
-        
-    #except FloatingPointError:
-    #angle = 0.0
         
     if units == 'rad':
         pass
@@ -36,18 +36,21 @@ def vec_angle(v1, v2, units='rad'):
         angle = (180 / np.pi)
     return angle
 
-''' Purpose:   To calculate the angle between two vectors regardless of angle
+def directional_angle(v1, v2, norm, units = "rad"):
+    ''' 
+    Purpose:   To calculate the angle between two vectors regardless of angle
                size. You are measuring the angle between the first and the
                second vectors. You must specify a normal vector that would result
                if you traveled from v1 to v2. Be careful and make sure you
                understand what it is actually doing if you want to use it. 
                See S1.
-    Arguments: (1) First vector.
-               (2) Second vector.
-               (3) Vector normal to the first and second vectors.
-               (4) Units to return the angle in. Default is radians.
-'''
-def directional_angle(v1, v2, norm, units = "rad"):
+    Arguments: v1) First vector.
+               v2) Second vector.
+               norm) Vector normal to the first and second vectors.
+               units) Units to return the angle in. Default is radians.
+    Returns:   Float. Value of the angle in either degrees or radians 
+               as specified by the user.
+    '''
     angle = vec_angle(v1, v2)
     trip_prod = np.dot(norm, np.cross(v1, v2))
     if trip_prod < 0:
@@ -56,18 +59,18 @@ def directional_angle(v1, v2, norm, units = "rad"):
         pass
     return angle
  
-
-
-''' Purpose:   To evenly distribute points across a sphere with a
-               specified radius are return a list of coordinates
-               corresponding to those points.
-    Arguments: (1) The number of points to distribute across the sphere's
-                   surface.
-               (2) The radius of the sphere which points should be
-                   distributed on.
-'''
-
 def fib_sphere(num_points, radius = 1.0):
+    ''' 
+    Purpose:   To evenly distribute points across a sphere with a 
+               specified radius are return a list of coordinates 
+               corresponding to those points.
+    Arguments: num_points) Integer. The number of points to distribute 
+               across the sphere's surface.
+               radius) Float. The radius of the sphere which points 
+               should be distributed on.
+    Returns:   N x 3 NP Array of Floats. Points distributed on the 
+               surface of a sphere centered at the origin.
+    '''
     ga = (3 - np.sqrt(5)) * np.pi # Value of the golden angle.
     
     # Golden angle increments along the number of points.
@@ -86,30 +89,42 @@ def fib_sphere(num_points, radius = 1.0):
     x = np.transpose([list(x)])
     y = np.transpose([list(y)])
     z = np.transpose([list(z)])
+
     xyz = np.concatenate([x, y, z], axis = 1)
     xyz = xyz * radius
-    #x = np.array(x) * radius 
-    #y = np.array(y) * radius 
-    #z = np.array(z) * radius 
     rad = np.sqrt((x * x) + (y * y) + (z * z))
 
     return np.array(xyz)
 
 def sun_radius(k, num_points, boundary_points):
+    '''
+    Purpose:   Determines the distance from the origin that the 
+               point should be placed at on a unit disc.
+    Arguments: k) Integer. Number of the current point.
+               num_points) Integer. Total number of points to be 
+               distributed.
+               boundary_points) Integer. The number of points that 
+               should form the boundary of the disc.
+    Returns:   Float. Radius of the point if it were to occur on a 
+               unit disc.
+    '''
     if k > num_points - boundary_points:
         r = 1
     else:
-        r = np.sqrt(k - 0.5) / np.sqrt(num_points - (boundary_points + 1) / 2)
+        r = np.sqrt(k - 0.5) / \
+            np.sqrt(num_points - (boundary_points + 1) / 2)
     return r
 
 def sunflower(num_points, radius, alpha = 2.0, height = 0.0):
     '''
-    Purpose   :     This function uses the sunflower distribution to evenly distribute
-            points within a circle of a given radius
-    Arguments :    1) Num_points --> points to be distributed
-            2) Alpha --> important for populating. 2 is smoother than 0
-            3) Radius --> use your brain dipshit
-    Returns   : List of lists of x,y coords. [[x0, y0]...[xn, yn]]
+    Purpose:   This function uses the sunflower distribution to evenly 
+               distribute points within a circle of a given radius
+    Arguments: num_points) Integer. Number of points to be distributed.
+               alpha) Float. Parameter used during populating. 2 
+               results in a smoother distribution than 0.
+               radius) The radius of the disc.
+    Returns:   List of Lists of 3 Floats. Each list contains the x, y, 
+               and z coordinates of a point.
     '''
     boundary_points = round(alpha * np.sqrt(num_points))
     phi = (np.sqrt(5.0) + 1.0) * 0.5
@@ -123,6 +138,15 @@ def sunflower(num_points, radius, alpha = 2.0, height = 0.0):
     return point_list
 
 def circle(num_points, radius, height):
+    '''
+    Purpose:   Distributes points evenly on a circle.
+    Arguments: num_points) Integer. Number of points to be 
+               distributed.
+               radius) Float. The desired radius of the circle.
+               height) Float. Height of the system.
+    Returns:   List of Lists of 3 Floats. Each list contains the x, y, 
+               and z coordinates of a point.
+    '''
     point_list = []
     theta = np.linspace(0, 2 * np.pi, num_points, endpoint=False)
     
@@ -133,6 +157,17 @@ def circle(num_points, radius, height):
     return point_list
 
 def grid(num_points, length, width, height = 0.0):
+    '''
+    Purpose:   Distributes points evenly across a grid.
+    Arguments: num_points) Integer. Number of points to be 
+               distributed.
+               length) Float. The desired length of the grid.
+               width) Float. The desired width of the grid.
+               height) Float. Elevation of the grid.
+    Returns:   N x 3 NP Array of Floats. Where each column 
+               corresponds to the x, y, and z coordinates, 
+               respectively.
+    '''
     point_collection = []
 
     if num_points == 0:
