@@ -1261,7 +1261,22 @@ class BiomolComplex(object):
         self.entity_atom_count = Molecule.get_count(molecules)
         self.entity_atom_count = self.entity_atom_count.astype(int)
 
-    def remove_overlap(self, struc2, radius):
+    def get_entity_centroids(self):
+        def get_centroid(a, b):
+            return(np.mean(self.xyz[a:b], axis = 0))
+
+        get_centroid = np.frompyfunc(get_centroid, 2, 1)
+
+        entity_sele = np.cumsum(self.entity_atom_count)
+        entity_sele = np.concatenate([np.array([0]), 
+                                       entity_sele])
+        lower_sele = entity_sele[:-1]
+        upper_sele = entity_sele[1:]
+
+        return(np.vstack(get_centroid(lower_sele, upper_sele)))
+
+
+    def remove_overlap(self, struc2, radius, atom_based = True):
         ''' 
         Purpose:   Remove entities in self that overlap with entities 
                    in struct2.
@@ -1270,12 +1285,20 @@ class BiomolComplex(object):
                    radius) Float. Distance cuttoff for atoms of self 
                    and struc2 which will trigger removal of self 
                    entity.        
+                   atom_based) Boolean. Controls whether atomic or 
+                   entity centroids are used for removing overlap.
         Requires:  ids, structures, positions
         Modifies:  all
         Returns:   Nothing
         '''
+
         struc1_tree = scipy.spatial.KDTree(self.xyz)
-        struc2_tree = scipy.spatial.KDTree(struc2.xyz)
+        if atom_based:
+            struc2_tree = scipy.spatial.KDTree(struc2.xyz)
+        else:
+            struc2_tree = \
+                scipy.spatial.KDTree(struc2.get_entity_centroids())
+
         sparse = \
             struc1_tree.sparse_distance_matrix(struc2_tree, radius, 
                                                output_type = "ndarray")

@@ -1,10 +1,28 @@
-# MMAEVe - Membranes, Micelles, And Even Vesicles
+#MMAEVe - Membranes, Micelles, And Even Vesicles
 
 MMAEVe is a simple python package for creating complex biomolecular systems. It can be used to distribute biomolecules about different surfaces, remove overlap between constructed system elements, write pdb files suitable for use as initial starting structures for AMBER and Gromacs, and write Gromacs topology files. It is a simple but powerful tool that can be used to systematically generate complex structures.
 
 ## Installation
 
-Working on getting it up on conda-forge as a package. For now just download the repo. Be sure that your environment has numpy, scipy, and pandas.
+### Requirements
+
+MMAEVe will work with python version >=3.5. Additionally, it requires the following packages:
+
+```bash
+numpy
+scipy
+pandas
+```
+
+### Installation via Conda
+
+MMAEVe can be installed easily using the conda package manager. It is available via the conda-forge channel. To install, simpy create an environment with a python version >=3.5 and run:
+
+```bash
+$ conda install -c conda-forge mmaeve
+```
+
+After installation, MMAEVe will be available as a Python package.
 
 ## Dirty Guide
 
