@@ -83,7 +83,6 @@ A render of the system was created using Molecular Nodes and is shown below.
 ### Single Protein
 
 A new composition is defined for creating the protein component of the system.
-
 ```python
 porin_comp = mav.read_comp("compositions/porin_comp")
 ```
@@ -104,8 +103,9 @@ The porin is then centered on the bilayer. This uses the `centroid` method and t
 porin + (bilayer0.centroid() - porin.centroid())
 ```
 
-The porin is centered on the system but this means that it is overlapping existing lipids within the system. The `remove_overlap` method can be utilized to remove any molecules that come within a cutoff of a system. The following will remove any lipids from `bilayer0` that have beads within 3.0 Å of `porin`.
+The porin is centered on the system but this means that it is overlapping existing lipids within the system. The `remove_overlap` method can be utilized to remove any molecules that come within a cutoff of a system. It takes four arguments. The system that it operates on is the one that will be modified, `bilayer0` in this case. `porin_grid` is the system that is checked against for overlap. A cutoff distance is also provided. Additionally, an optional argument can be provided that specifies whether the atoms or centroids of the system that are checked against. Usually, the default atom-based method is used is sufficient. In this case, the porins have space at the center so the atom-based method alone is insufficient. So we apply the centroid-based method followed by the atom-based method.
 ```python
+bilayer0.remove_overlap(porin_grid, 20.0, atom_based = False)
 bilayer0.remove_overlap(porin, 3.0)
 ```
 
@@ -117,39 +117,248 @@ porin_bilayer.write_cif("complexes/bilayer_porin.cif")
 porin_bilayer.write_pdb("complexes/bilayer_porin.pdb")
 ```
 
-![](images/bilayer_porin.png)
+![](images/porin_bilayer.png)
 
 ### Multiple Proteins
 
+No new compositions are needed for creating this system. Additionally, the same bilayer can be used again.
+```python
+bilayer1 = copy.deepcopy(bilayer)
+```
 
+This time the porins are distributed on the surface of a 150. x 150. Å grid. This grid is shifted 0. Å in the z-direction. 2 x 2 porins are distributed on the surface mapped to the 150. x 150. Å grid. The existing porin composition is used.
+```python
+porin_grid = mav.Grid(150., 150., 0., 2, 2, porin_comp)
+porin_grid.distribute() 
+```
 
+The system is shifted.
+```python
+porin_grid + (bilayer1.centroid() - porin_grid.centroid())
+```
 
+Any lipids overlapping with the porins are removed.
+```python
+bilayer1.remove_overlap(porin_grid, 20.0, atom_based = False)
+bilayer1.remove_overlap(porin_grid, 3.0, atom_based = True)
+```
 
+The systems are combined and exported.
+```python
+porin_grid_bilayer = bilayer1 + porin_grid
 
+porin_grid_bilayer.write_cif("complexes/porin_grid_bilayer.cif")
+porin_grid_bilayer.write_pdb("complexes/porin_grid_bilayer.pdb")
+```
 
+![](images/porin_grid_bilayer.png)
 
 ## Lipid Nanodiscs
 
-nanodisc_comp     = mav.read_comp("compositions/nanodisc_comp")
-spike_comp        = mav.read_comp("compositions/spike_comp")
-a2t_comp          = mav.read_comp("compositions/a2t_comp")
-spike_coarse_comp = mav.read_comp("compositions/cspike_comp")
+A new composition is required to build the nanodisc as a protein component is required to act as a scaffold for the system.
+``` python
+nanodisc_comp = mav.read_comp("compositions/nanodisc_comp")
+```
 
-## Lipid Nanotubes
+The leaflets of the system are generated using a `Disc`. The radius, height, molecule number, and composition are specified when the `Disc` is initialized.
+``` python
+upper_leaf = mav.Disc(95., 23., 464, upper_leaf_comp)
+lower_leaf = mav.Disc(95.,  0., 464, lower_leaf_comp)
 
-## An Array of Lipid Nanotubes
+upper_leaf.distribute()
+lower_leaf.distribute()
+
+disc = upper_leaf + lower_leaf
+```
+
+Notice that the `distribute` method is not called. This is because selecting appropriate Head and Tail atoms for aligning the system is extremely difficult. Instead, MSP2N2 was pre-aligned using PyMol. The aligned structure can then be utilized. Not calling the `distribute` method preserves MSP2N2 in its original position. After initialization, it is then centered on `disc`.
+``` python
+msp2n2 = mav.Lattice(115., 115., 0., 1, nanodisc_comp)
+msp2n2 + (disc.centroid() - msp2n2.centroid())
+```
+
+Final steps and writing the system.
+``` python
+disc.remove_overlap(msp2n2, radius = 3.0)
+nanodisc = disc + msp2n2 
+
+nanodisc.write_cif("complexes/nanodisc.cif")
+nanodisc.write_pdb("complexes/nanodisc.pdb")
+```
+
+![](images/nanodisc.png)
+
+## Lipid Nanotube
+
+A nanotube is constructed using two cylinders. The outer leaf is initialized with a radius of 75. Å, length of 300. Å, no shift in the z-direction, 2207 lipids, and the `upper_leaf_comp`. The inner leaf is initialized by specifying similar arguments.
+```python
+outer_leaf = mav.Cylinder(75., 300., 0., 2207, upper_leaf_comp)
+inner_leaf = mav.Cylinder(52., 300., 0., 1606, lower_leaf_comp)
+
+outer_leaf.distribute()
+innter_leaf.distribute()
+```
+
+The system is combined and saved.
+```python
+nanotube = outer_leaf + inner_leaf
+
+nanotube.write_cif("complexes/nanotube.cif")
+nanotube.write_pdb("complexes/nanotube.pdb")
+```
+
+![](images/nanotube.png)
+
+## Array of Lipid Nanotubes
+
+Nanotubes have been utilized to control the deposition of inorganic substances. It might be interesting to investigate not just one nanotube but a configuration of nanotubes.
+
+Copies are made of the existing nanotube for use in constructing the array.
+```python
+nanotube0 = copy.deepcopy(nanotube)
+nanotube1 = copy.deepcopy(nanotube)
+nanotube2 = copy.deepcopy(nanotube)
+```
+
+The nanotubes are shifted such that they are arranged in a grid.
+```python
+nanotube0 + np.array([165., 0., 0.])
+nanotube1 + np.array([0., 165., 0.])
+nanotube2 + np.array([165., 165., 0.])
+```
+
+The individual nanotubes are combined into a single system and the structure is saved.
+```python
+nanotube_array = nanotube + nanotube0 + nanotube1 + nanotube2
+
+nanotube_array.write_cif("complexes/nanotube_array.cif")
+nanotube_array.write_pdb("complexes/nanotube_array.pdb")
+```
+
+![](images/nanotube_array.png)
 
 ## Vesicles
 
+Two spheres are used to create a vesicle. Spheres require that a radius, height, number of molecules, and a composition are specified. Optionally, a pore-radius can be specified. The pore radius is used to create pores along the principal axes and are a part of a procedure that can be used to equilibrate the number of lipids beterrn the inner and outer leaflets of the vesicle.
+```python
+outer_leaf = mav.Sphere(125., 0., 3000, upper_leaf_comp, 
+                    pore_radius = 20.0)
+inner_leaf = mav.Sphere(100., 0., 1875, lower_leaf_comp,
+                    pore_radius = 20.0)
+
+outer_leaf.distribute()
+inner_leaf.distribute()
+```
+
+```python
+vesicle = outer_leaf + inner_leaf
+
+vesicle.write_cif("complexes/vesicle.cif")
+vesicle.write_pdb("complexes/vesicle.pdb")
+```
+
+![](images/vesicle.png)
+
 ## Periphreal Membrane-Binding Proteins around a Vesicle
+
+We can also distribute proteins about a sphere. This can be useful for constructing systems containing periphreal membrane-binding proteins around a vesicle.
+```python
+a2_comp = mav.read_comp("compositions/a2_comp")
+```
+
+```python
+a2 = mav.Sphere(165., 0., 10, a2_comp)
+a2.distribute()
+```
+
+```python
+vesi_a2 = vesicle + a2
+
+vesi_a2.write_cif("complexes/vesi_a2.cif")
+vesi_a2.write_pdb("complexes/vesi_a2.pdb")
+```
+
+![](images/vesi_a2.png)
 
 ## Membrane-Vesicle Junction
 
+A new composition is required for the protein component but the previous vesicle can be recycled.
+```python
+a2t_comp = mav.read_comp("compositions/a2t_comp")
+
+vesicle0 = copy.deepcopy(vesicle)
+```
+
+A larger bilayer is necessary for constructing the system.
+```python
+upper_leaf = mav.Lattice(350., 350., 23., 2008, upper_leaf_comp)
+lower_leaf = mav.Lattice(350., 350., 0., 2008, lower_leaf_comp)
+upper_leaf.distribute()
+lower_leaf.distribute()
+bilayer = upper_leaf + lower_leaf
+
+vesicle0 + (bilayer.centroid() - vesicle0.centroid())
+vesicle0 + np.array([0., 0., 300.])
+```
+
+`Grid` is utilized for contructing the protein component of the system as it was utilized during when constructing the system with four porins.
+```python
+a2t = mav.Grid(240., 240., 0., 3, 3, a2t_comp)
+a2t.distribute() 
+a2t + (bilayer.centroid() - a2t.centroid())
+a2t + np.array([0., 0., 100.])
+
+vesi_bi_a2t = vesicle0 + bilayer + a2t
+
+vesi_bi_a2t.write_cif("complexes/vesicle_bi_a2t.cif")
+vesi_bi_a2t.write_pdb("complexes/vesicle_bi_a2t.pdb")
+```
+
+![](images/vesicle_bi_a2t.png)
+
 ## Covid Virion
 
+The final system we will construct is a covid-19 virion. Nothing new is introduced here. It is just to show off what MMAEVe is capable of.
+```python
+spike_comp = mav.read_comp("compositions/spike_comp")
+
+outer_leaf = mav.Sphere(500., 0., 51475, upper_leaf_comp)
+inner_leaf = mav.Sphere(475., 0., 46456, lower_leaf_comp)
+outer_leaf.distribute()
+inner_leaf.distribute()
+vesicle = outer_leaf + inner_leaf
+
+spike = mav.Sphere(600., 0., 75, spike_comp)
+spike.distribute()
+
+vesicle.remove_overlap(spike, 4.)
+
+covid = spike + vesicle
+covid.write_cif("complexes/covid_viron.cif")
+covid.write_pdb("complexes/covid_viron.pdb")
+```
+
+![](images/covid_virion.png)
+
 ## GROMACS Topology Files
+Gromacs topology files with a count of each component of the system can be written. It does not include references to the required .itp files, this must be added by the user. It uses the .pdb file name as the molecule name. Ensure that the structure name matches that defined in any of the required itp files. The method only requires the name of the file to be written.
+
+```python
 bilayer.write_gromacs_top("complexes/bilayer.top")
+```
 
 ## AMBER-Safe PDB Files
 
+While all of the examples shown in this tutorial were of coarse-grained systems. MMAEVe is also perfectly capable of constructing all-atomic systems. Generating an approtriate .pdb for the Antechamber program of AMBER is straightforward when individual molecules are used. However, if protein complexes are utilized then each subunit should have a chain ID associated with it. This will ensure that Antechamber recognizes the protein complex subunits as inditidual molecules.
+
 ## Reproducible Systems
+
+While not highlighted during any of the system constructions in the tutorial, it is possible to specify a random seed during the initialization of any system. It simply requires the specification of a `seed` argument. As shown below.
+
+```python
+upper_leaf = mav.Disc(95., 23., 464, upper_leaf_comp, seed = 0)
+```
+
+## Getting Help
+
+Docustrings are provided for every class, function, and method in MMAEVe. Simpy use Python's built-in `help()` function to retrieve the help function.
