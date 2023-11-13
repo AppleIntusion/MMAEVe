@@ -36,9 +36,12 @@ def fib_lattice(length, width, height, n_points):
     if n_points == 1:
         return(np.array([[0., 0., 0.]]))
         
+    eps = 0.5
     au_ratio = (1 + (5 ** 0.5)) / 2
     x = (np.arange(0, n_points, 1) / au_ratio) % 1 * length
-    y = np.arange(0, n_points, 1) / (n_points - 1) * width
+    y = (np.arange(0, n_points, 1) + eps) \
+        /                                 \
+        ((n_points - 1) + (2. * eps)) * width
     z = np.repeat(0., n_points) + height
     
     return(np.stack([x, y, z], axis = -1))
