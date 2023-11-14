@@ -369,7 +369,7 @@ Please note that I was not particularly rigorous regarding the membrane composit
 
 ## References
 
-Appropriate citations for all of the structures utilized for example system construction as well as references for the Software are
+Citations for all of the structures utilized for example system construction as well as references for the Software that were necessary for visualization of systems and coarse-graining of proteins.
 
 ### Structures
 
