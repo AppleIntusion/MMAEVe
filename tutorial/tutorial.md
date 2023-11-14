@@ -393,14 +393,15 @@ Appropriate citations for all of the structures utilized for example system cons
 
 #### Direct Links
 
+1. [Martinize](https://github.com/marrink-lab/vermouth-martinize)
+2. [Molecular Nodes](https://github.com/BradyAJohnston/MolecularNodes)
+3. [Blender](https://www.blender.org/)
+4. [PyMol](https://github.com/schrodinger/pymol-open-source)
+
+#### Citations
+
 1. Kroon P C, Grunewald F, Barnoud J, van Tilburg M, Souza P C T, Wassenaar T A, Marrink S J (2023) Martinize2 and Vermouth: Unified Framework for Topology Generation eLife 12:RP90627
 2. Brady Johnston, Yuxuan Zhuang, Yinying Yao, William McCorkindale, Johannes Elferich, Patrick Kunzmann, Rich, Olivier Laprevote, Thibault Tubiana, Domenico Marson, James Hooker, Jessica A. Nash, & Joyce Kim. (2023). BradyAJohnston/MolecularNodes: v2.10.0 for Blender 3.5+ (v2.10.0). Zenodo.
 3. Community, B. O. (2018). Blender - a 3D modelling and rendering package. Stichting Blender Foundation, Amsterdam.
 4. Schrodinger, LLC. 2010. The PyMOL Molecular Graphics System, Version 2.0.
 
-#### Citations
-
-1. [Martinize](https://github.com/marrink-lab/vermouth-martinize)
-2. [Molecular Nodes](https://github.com/BradyAJohnston/MolecularNodes)
-3. [Blender](https://www.blender.org/)
-4. [PyMol](https://github.com/schrodinger/pymol-open-source)
