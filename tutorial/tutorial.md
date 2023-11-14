@@ -1,12 +1,12 @@
 # MMAEVe Tutorial
 
-The purpose of this tutorial is to give a comprehensive introduction to MMAEVe. It will cover all possible structure types that it can be used to build as well as all methods that can be used to build, modify, or write systems. See the ReadMe.md for installation instructions.
+The purpose of this tutorial is to give a comprehensive introduction to MMAEVe. It will cover all possible structure types that it can be used to build as well as all methods that can be used to build, modify, or write systems. See the [README.md](../README.md) for installation instructions.
 
 ## Setting-up the Environment
 
-The first step to building a system using MMAEVe is to set-up the environment. One directory,  `structures`, is required and another, `compositions`, is reccomended. For the purposes of this tutorial, both of these directories already exist and are populated with everything that will be needed to perform the tutorial.
+The first step to building a system using MMAEVe is to set-up the environment. One directory, `structures`, is required and another, `compositions`, is recommended. For the purposes of this tutorial, both directories already exist and are populated with everything that will be needed to perform the tutorial.
 
-The `structures` directory contains .pdb files that will serve as the building blocks of the system. The `compositions` directory contains plain-text "composition" files which describe the structure and proportions of the system as well as define "Head" and "Tail" atoms that are used to orient the system.
+The `structures` directory contains .pdb files that will serve as the building blocks of the system. The `compositions` directory contains plain text "composition" files which describe the structure and proportions of the system as well as define "Head" and "Tail" atoms that are used to orient the system.
 
 All output structures from the tutorial will be written to the `complexes` directory.
 
@@ -239,7 +239,7 @@ nanotube_array.write_pdb("complexes/nanotube_array.pdb")
 
 ## Vesicles
 
-Two spheres are used to create a vesicle. Spheres require that a radius, height, number of molecules, and a composition are specified. Optionally, a pore-radius can be specified. The pore radius is used to create pores along the principal axes and are a part of a procedure that can be used to equilibrate the number of lipids beterrn the inner and outer leaflets of the vesicle.
+Two spheres are used to create a vesicle. Spheres require that a radius, height, number of molecules, and a composition are specified. Optionally, a pore-radius can be specified. The pore radius is used to create pores along the principal axes and are a part of a procedure that can be used to equilibrate the number of lipids between the inner and outer leaflets of the vesicle.
 ```python
 outer_leaf = mav.Sphere(125., 0., 3000, upper_leaf_comp, 
                     pore_radius = 20.0)
@@ -259,9 +259,9 @@ vesicle.write_pdb("complexes/vesicle.pdb")
 
 ![](images/vesicle.png)
 
-## Periphreal Membrane-Binding Proteins around a Vesicle
+## Peripheral Membrane-Binding Proteins around a Vesicle
 
-We can also distribute proteins about a sphere. This can be useful for constructing systems containing periphreal membrane-binding proteins around a vesicle.
+We can also distribute proteins about a sphere. This can be useful for constructing systems containing peripheral membrane-binding proteins around a vesicle.
 ```python
 a2_comp = mav.read_comp("compositions/a2_comp")
 ```
@@ -282,7 +282,7 @@ vesi_a2.write_pdb("complexes/vesi_a2.pdb")
 
 ## Membrane-Vesicle Junction
 
-A new composition is required for the protein component but the previous vesicle can be recycled.
+A new composition is required for the protein component, but the previous vesicle can be recycled.
 ```python
 a2t_comp = mav.read_comp("compositions/a2t_comp")
 
@@ -301,7 +301,7 @@ vesicle0 + (bilayer.centroid() - vesicle0.centroid())
 vesicle0 + np.array([0., 0., 300.])
 ```
 
-`Grid` is utilized for contructing the protein component of the system as it was utilized during when constructing the system with four porins.
+`Grid` is utilized for constructing the protein component of the system as it was utilized during when constructing the system with four porins.
 ```python
 a2t = mav.Grid(240., 240., 0., 3, 3, a2t_comp)
 a2t.distribute() 
@@ -349,7 +349,7 @@ bilayer.write_gromacs_top("complexes/bilayer.top")
 
 ## AMBER-Safe PDB Files
 
-While all of the examples shown in this tutorial were of coarse-grained systems. MMAEVe is also perfectly capable of constructing all-atomic systems. Generating an approtriate .pdb for the Antechamber program of AMBER is straightforward when individual molecules are used. However, if protein complexes are utilized then each subunit should have a chain ID associated with it. This will ensure that Antechamber recognizes the protein complex subunits as inditidual molecules.
+While all of the examples shown in this tutorial were of coarse-grained systems. MMAEVe is also perfectly capable of constructing all-atomic systems. Generating an appropriate .pdb for the Antechamber program of AMBER is straightforward when individual molecules are used. However, if protein complexes are utilized then each subunit should have a chain ID associated with it. This will ensure that Antechamber recognizes the protein complex subunits as individual molecules.
 
 ## Reproducible Systems
 
@@ -361,4 +361,46 @@ upper_leaf = mav.Disc(95., 23., 464, upper_leaf_comp, seed = 0)
 
 ## Getting Help
 
-Docustrings are provided for every class, function, and method in MMAEVe. Simpy use Python's built-in `help()` function to retrieve the help function.
+Docustrings are provided for every class, function, and method in MMAEVe. Use Python's built-in `help()` function to retrieve the desired docustring.
+
+## Notes
+
+Please note that I was not particularly rigorous regarding the membrane compositions for the Porin and Covid systems. I know for a fact that the covid system is not a very faithful model; the membrane composition is not accurate and the M and E proteins were not included during system construction. I have not looked into the composition of membranes that Porins are found in. I preserved the same composition throughout the tutorial because it cut down on the number of required structures and made the process more convenient for me.
+
+## References
+
+Appropriate citations for all of the structures utilized for example system construction as well as references for the Software are
+
+### Structures
+
+#### Direct Links
+
+1. All lipids were retrieved from the [Martini lipidome page](http://cgmartini.nl/index.php/force-field-parameters/lipids).
+2. [The Sars-Cov-2 S protein](https://www.rcsb.org/structure/7VHK)
+3. [Porin](https://www.rcsb.org/structure/2POR)
+4. [Annexin A2](https://www.rcsb.org/structure/2HYW)
+5. [Annexin A2/S100A10 Heterotetramer](https://www.rcsb.org/structure/4HRE)
+
+#### Citations
+
+1. T.A. Wassenaar, H.I. Ingólfsson, R.A. Böckmann, D.P. Tieleman, S.J. Marrink. Computational lipidomics with insane: a versatile tool for generating custom membranes for molecular simulations. JCTC, 11:2144–2155, 2015.
+2. Weiss MS, Schulz GE. Structure of porin refined at 1.8 A resolution. J Mol Biol. 1992 Sep 20;227(2):493-509.
+3. Shao C, Zhang F, Kemp MM, Linhardt RJ, Waisman DM, Head JF, Seaton BA. Crystallographic analysis of calcium-dependent heparin binding to annexin A2. J Biol Chem. 2006 Oct 20;281(42):31689-95.
+4. Oh YS, Gao P, Lee KW, Ceglia I, Seo JS, Zhang X, Ahn JH, Chait BT, Patel DJ, Kim Y, Greengard P. SMARCA3, a chromatin-remodeling factor, is required for p11-dependent antidepressant action. Cell. 2013 Feb 14;152(4):831-43.
+
+
+### Tools
+
+#### Direct Links
+
+1. Kroon P C, Grunewald F, Barnoud J, van Tilburg M, Souza P C T, Wassenaar T A, Marrink S J (2023) Martinize2 and Vermouth: Unified Framework for Topology Generation eLife 12:RP90627
+2. Brady Johnston, Yuxuan Zhuang, Yinying Yao, William McCorkindale, Johannes Elferich, Patrick Kunzmann, Rich, Olivier Laprevote, Thibault Tubiana, Domenico Marson, James Hooker, Jessica A. Nash, & Joyce Kim. (2023). BradyAJohnston/MolecularNodes: v2.10.0 for Blender 3.5+ (v2.10.0). Zenodo.
+3. Community, B. O. (2018). Blender - a 3D modelling and rendering package. Stichting Blender Foundation, Amsterdam.
+4. Schrodinger, LLC. 2010. The PyMOL Molecular Graphics System, Version 2.0.
+
+#### Citations
+
+1. [Martinize](https://github.com/marrink-lab/vermouth-martinize)
+2. [Molecular Nodes](https://github.com/BradyAJohnston/MolecularNodes)
+3. [Blender](https://www.blender.org/)
+4. [PyMol](https://github.com/schrodinger/pymol-open-source)

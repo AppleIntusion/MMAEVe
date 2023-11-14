@@ -8,12 +8,12 @@ from os import path, walk
 
 setup(
     name="mmaeve",
-    version="0.5",  # change this in nmrglue/__init__.py also
+    version="0.5",
     description="A module for creating biomolecular structures in " + \
                 "Python",
     url="https://github.com/AppleIntusion/MMAEVe",
     author="Gubbin Eel",
-    license="New BSD License",
+    license="GPLv2",
     requires=["numpy", "scipy", "pandas"],
     packages=["mmaeve"]
 )
