@@ -1,10 +1,13 @@
 import MMAEVe as mav
 import numpy as np
 import copy 
+import time
 
 '''
 | Simple Bilayer
 '''
+
+start_time = time.time()
 
 upper_leaf_comp   = mav.read_comp("compositions/upper_leaf_comp")
 lower_leaf_comp   = mav.read_comp("compositions/lower_leaf_comp")
@@ -19,6 +22,7 @@ bilayer = upper_leaf + lower_leaf
 
 bilayer.write_cif("complexes/bilayer.cif")
 bilayer.write_pdb("complexes/bilayer.pdb")
+
 
 '''
 | Single Embedded Porin
@@ -117,9 +121,11 @@ nanotube_array.write_pdb("complexes/nanotube_array.pdb")
 | Vesicle
 '''
 
-outer_leaf = mav.Sphere(125., 0., 3000, upper_leaf_comp, 
+start_time = time.time()
+
+outer_leaf = mav.Sphere(125., 0., 4000, upper_leaf_comp, 
                     pore_radius = 20.0)
-inner_leaf = mav.Sphere(100., 0., 1875, lower_leaf_comp,
+inner_leaf = mav.Sphere(100., 0., 3875, lower_leaf_comp,
                     pore_radius = 20.0)
 
 outer_leaf.distribute()

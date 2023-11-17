@@ -1480,45 +1480,36 @@ class BiomolComplex(object):
         self.positions[:, 1] = self.positions[:, 2]
         self.positions[:, 2] = tmp
 
-    def write_cif(self, file_name, keep_asym = False):
+    def write_cif(self, file_name, keep_asym = True, buff = 8192, 
+                  chunksize = 100000):
         '''
         Purpose:   Write structure to a cif file. No advanced field 
                    manipulation is supported. This is a bare-bones 
                    method to get the structure written as a cif file. 
-                   More advanced features will probably manifest as 
-                   seperate methods for adding fields to the class 
-                   instance then adding a mechanism for choosing 
-                   which fields get written to the cif file. I have
-                   had spotty success with getting the structures 
-                   read. PyMol will read them without issue. Meant
-                   for a quick-and-dirty visualization.
+                   I have had spotty success with getting the 
+                   structures read. PyMol will read them without 
+                   issue. Meant for a quick visualization.
         Arguments: self) BiomolComplex instance.
                    file_name) String. Name to write the cif file to.
                    should include the '.cif' extension in the name.
+                   keep_asym) Boolean. Controls whether an attempt 
+                   to keep the original asym id is made or if a new 
+                   one is generated.
+                   buff) Integer. Controls the buffersize of the open
+                   function. 
+                   chunksize) Integer. Controls the number of "chunks" 
+                   to write the file in. 
         Requires:  residue_count, tail, name, residue_atom_count, 
-                   resn, xyz 
+                   resn, xyz, name, chain 
         Modifies:  none
         Returns:   Nothing
         '''
-        res_count = np.sum(self.residue_count) # Total # of residues
         atom_count = len(self.tail)            # Total number of atoms
+        res_count = np.sum(self.residue_count) # Total # of residues
 
-        # Generate each of the fields needed to write the cif file.
-        group_pdb     = np.repeat(np.array(["ATOM"]), atom_count)
-        atm_id        = np.arange(1, atom_count + 1, 1)
-        label_atom_id = self.name
-        label_seq_id  = np.repeat(
-                              np.arange(1, res_count + 1, 1), 
-                                        self.residue_atom_count)
-        label_comp_id = self.resn
-        label_entity_id = np.repeat(np.array(["A"]), atom_count)
-        cartn_x = self.xyz[:, 0]
-        cartn_y = self.xyz[:, 1]
-        cartn_z = self.xyz[:, 2]
-
-        # Handle the asym_id
         if keep_asym == True:
             # Keeps original, replaces any blank fields
+            label_asym_id = self.chain
             label_asym_id[label_asym_id == ''] = '+'
             label_asym_id = np.char.replace(self.chain, '+', '?')
             pass
@@ -1526,119 +1517,107 @@ class BiomolComplex(object):
             # Makes asym_id uniform
             label_asym_id = np.repeat(np.array(["A"]), atom_count)
 
-        # Generate 'pd.DataFrame' from data
-        entries = {"group_PDB"          : group_pdb,
-                   "id"                 : atm_id,
-                   "label_atom_id"      : label_atom_id,
-                   "label_seq_id"       : label_seq_id,
-                   "label_comp_id"      : label_comp_id,
-                   "label_asym_id"      : label_asym_id,
-                   "label_entity_id"    : label_entity_id,
-                   "Cartn_x"            : cartn_x,
-                   "Cartn_y"            : cartn_y,
-                   "Cartn_z"            : cartn_z
-        }
-        structure_data = pd.DataFrame.from_dict(entries)
-        structure_data["id"] = structure_data["id"].astype(str)
-        structure_data["label_seq_id"] = structure_data["label_seq_id"].astype(str)
+        # PDB fields to write: atom serial, atom name, residue name, 
+        # chain id, residue number, x, y, z.
+        fields = [
+            np.mod(np.arange(1, atom_count + 1, 1), 100000), # len correctable
+            self.name,
+            self.resn,
+            label_asym_id,
+            np.mod(np.repeat(np.arange(1, res_count + 1, 1), 
+                          self.residue_atom_count), 10000), # len correctable
+            np.round(self.xyz[:, 0], decimals = 3),
+            np.round(self.xyz[:, 1], decimals = 3),
+            np.round(self.xyz[:, 2], decimals = 3)]
+        nparts = self.xyz.shape[0] # Number of file lines
+        resid = np.zeros(nparts, dtype = int)
+        count = 1
 
-        # Create 'pd.DataFrame' that contains the cif header
-        data_fields = ["data_LIPID", "#", "loop_", 
-            "_atom_site.group_PDB", "_atom_site.id", 
-            "_atom_site.label_atom_id", 
-            "_atom_site.label_seq_id", "_atom_site.label_comp_id", 
-            "_atom_site.label_asym_id", "_atom_site.label_entity_id",
-            "_atom_site.Cartn_x", "_atom_site.Cartn_y", 
-            "_atom_site.Cartn_z"]
-        cif_header = {"group_PDB" : data_fields}
+        # Used to format when writing file lines.
+        write_string = "ATOM {:5d} {:4s} {:4s} {:1s} {:4d} " + \
+                       "{:8.3f} {:8.3f} {:8.3f}\n"
+        with open(file_name, 'w', buff) as fout:
+            chunks = list(range(0, nparts, chunksize))
+            chunks.append(nparts + 1)   # so slicing is from 2ndtolast:size
+            header = "data_LIPID\n#\nloop_\n_atom_site.group_PDB\n" + \
+                     "_atom_site.id\n_atom_site.label_atom_id\n"    + \
+                     "_atom_site.label_comp_id\n"                   + \
+                     "_atom_site.label_asym_id\n"                   + \
+                     "_atom_site.label_seq_id\n"                    + \
+                     "_atom_site.Cartn_x\n_atom_site.Cartn_y\n"     + \
+                     "_atom_site.Cartn_z\n"
+            fout.writelines(header)
 
-        # Join the two dataframe and write to cif file.
-        cif_header = pd.DataFrame.from_dict(cif_header)
-        structure_data = pd.concat([cif_header, structure_data])
-        structure_data.to_csv(file_name, sep = ' ', 
-                              float_format = '%.3f', 
-                              index = False, header = None)
+            for startind, stopind in zip(chunks[:-1], chunks[1:]):
+                fout.writelines(
+                    [write_string.format(ii[0], ii[1], ii[2], ii[3], 
+                                         ii[4], ii[5], ii[6], ii[7]) 
+                     for ii in zip(fields[0][startind:stopind],  
+                                   fields[1][startind:stopind],
+                                   fields[2][startind:stopind],
+                                   fields[3][startind:stopind],
+                                   fields[4][startind:stopind],
+                                   fields[5][startind:stopind],
+                                   fields[6][startind:stopind],
+                                   fields[7][startind:stopind])
+                    ]
+                )
 
-    def write_pdb(self, file_name):
+    def write_pdb(self, file_name, buff = 8192, chunksize = 100000):
         '''
         Purpose:   Write structure to a pdb file.
         Arguments: self) BiomolComplex instance.
                    file_name) String. Name to write the pdb file to.
                    should include the '.pdb' extension in the name.
+                   buff) Integer. Controls the buffersize of the open
+                   function. 
+                   chunksize) Integer. Controls the number of "chunks" 
+                   to write the file in. 
         Requires:  residue_count, tail, name, resn, chain, 
-                   residue_atom_count, xyz, elem, charge, 
-                   entity_atom_count
+                   residue_atom_count, xyz, entity_atom_count
         Modifies:  none
         Returns:   Nothing
         '''
-        res_count = np.sum(self.residue_count) # Total # of residues
         atom_count = len(self.tail)            # Total number of atoms
+        res_count = np.sum(self.residue_count) # Total # of residues
 
-        # Collect all pdb fields
+        # PDB fields to write: atom serial, atom name, residue name, 
+        # chain id, residue number, x, y, z.
         fields = [
-            np.repeat(np.array(["ATOM"]), atom_count),
             np.arange(1, atom_count + 1, 1), # len correctable
-            np.repeat(' ', atom_count),
             self.name,
-            np.repeat(' ', atom_count),
             self.resn,
             self.chain,
             np.repeat(np.arange(1, res_count + 1, 1), 
                           self.residue_atom_count), # len correctable
-            np.repeat(' ', atom_count),
             np.round(self.xyz[:, 0], decimals = 3),
             np.round(self.xyz[:, 1], decimals = 3),
-            np.round(self.xyz[:, 2], decimals = 3),
-            np.repeat("1.00", atom_count),
-            np.repeat("0.00", atom_count),
-            np.repeat("    ", atom_count),
-            self.elem,
-            self.charge]
-        # Names of all fields. Used for generating informative error
-        # message as well as creating the dictionary for constructing
-        # the pd.DataFrame
-        names = ["Record type", "Atom serial number", "Blank", 
-                 "Atom name", "Alternate location indicator", 
-                 "Residue name", "Chain identifier", 
-                 "Residue sequence number", "Insertion code", 
-                 "X coord", "Y coord", "Z coord", "Occupancy", 
-                 "Temperature factor", "Segment identifier", 
-                 "Elemental symbol", "Charge"]
-        fields[1][fields[1] > 99999] = 99999
-        fields[7][fields[7] > 9999]  = 9999
-        fields = [f.astype(str) for f in fields]
+            np.round(self.xyz[:, 2], decimals = 3)]
+        nparts = self.xyz.shape[0] # Number of file lines
+        resid = np.zeros(nparts, dtype = int)
+        count = 1
 
-        # Ensure proper length of all pdb fields
-        # Max length prior to any modification.
-        max_len   = [4, 5, 1, 4, 1, 4, 1, 4, 1, 8,  8, 8, 
-                     6, 6, 4, 2, 2]
-        final_len = [6, 5, 1,  4, 1, 4, 1, 4, 1, 11, 8, 8, 
-                     6, 6, 10, 2, 2]
-        alignment = ['l', 'r', 'l', 'l', 'l', 'r', 'l', 'r', 'l', 
-                     'r', 'r', 'r', 'r', 'r', 'l', 'r', 'r']
-        space = np.repeat(' ', atom_count)
-        for ii in range(len(max_len)):
-            if any(np.char.str_len(fields[ii]) > max_len[ii]):
-                raise ValueError("The '%s' field" % names[ii], 
-                                 "is not the properlength.")
+        # Used to format when writing file lines.
+        write_string = "ATOM  {:5d} {:4s} {:4s}{:1s}{:4d}    " + \
+                       "{:8.3f}{:8.3f}{:8.3f}\n"
+        with open(file_name, 'w', buff) as fout:
+            chunks = list(range(0, nparts, chunksize))
+            chunks.append(nparts + 1)   # so slicing is from 2ndtolast:size
 
-            space_len = final_len[ii] - np.char.str_len(fields[ii])
-            blank_space = np.char.multiply(space, space_len)
-            
-            if alignment[ii] == 'r':
-                fields[ii] = np.char.add(blank_space, fields[ii])
-            elif alignment[ii] == 'l':
-                fields[ii] = np.char.add(fields[ii], blank_space)
-
-        # Join fields together into single array and insert TER lines
-        file_lines = np.stack(fields, axis = -1)
-        ter = np.array(["TER"] + [''] * 16)
-        file_lines = np.insert(file_lines, 
-                               np.cumsum(self.entity_atom_count), 
-                               ter, axis = 0)
-        # Save file
-        np.savetxt(file_name, file_lines, fmt = "%s", delimiter = '')
-
+            for startind, stopind in zip(chunks[:-1], chunks[1:]):
+                fout.writelines(
+                    [write_string.format(ii[0], ii[1], ii[2], ii[3], 
+                                         ii[4], ii[5], ii[6], ii[7]) 
+                     for ii in zip(fields[0][startind:stopind],  
+                                   fields[1][startind:stopind],
+                                   fields[2][startind:stopind],
+                                   fields[3][startind:stopind],
+                                   fields[4][startind:stopind],
+                                   fields[5][startind:stopind],
+                                   fields[6][startind:stopind],
+                                   fields[7][startind:stopind])
+                    ]
+                )
 
     def write_gromacs_top(self, file_name):
         '''
