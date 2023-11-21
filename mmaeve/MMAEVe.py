@@ -11,7 +11,7 @@
 # Import required modules
 import numpy as np
 import pandas as pd
-import scipy
+import scipy.spatial
 
 '''
 Shapes and Math
@@ -1593,6 +1593,9 @@ class BiomolComplex(object):
             np.round(self.xyz[:, 0], decimals = 3),
             np.round(self.xyz[:, 1], decimals = 3),
             np.round(self.xyz[:, 2], decimals = 3)]
+        # Reduce atom serial and residue number to proper size
+        fields[0] = np.mod(fields[0], 100000)
+        fields[4] = np.mod(fields[4], 10000)
         nparts = self.xyz.shape[0] # Number of file lines
         resid = np.zeros(nparts, dtype = int)
         count = 1
