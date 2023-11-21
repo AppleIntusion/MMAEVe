@@ -1605,7 +1605,6 @@ class BiomolComplex(object):
         insertion_indicies = np.cumsum(self.entity_atom_count)
         fields[0] = np.insert(fields[0], insertion_indicies, "TER", 
                               axis = 0)
-        print(len(fields[0]))
         fields[1] = np.insert(fields[1], insertion_indicies, 0, axis = 0)
         fields[2] = np.insert(fields[2], insertion_indicies, '', axis = 0)
         fields[3] = np.insert(fields[3], insertion_indicies, '', axis = 0)
