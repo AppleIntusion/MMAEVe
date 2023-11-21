@@ -3,10 +3,6 @@ import numpy as np
 import copy 
 import time
 
-'''
-| Script used to run benchmarks in pentaplicate. 
-'''
-
 def generate_timed(func):
     def timed_func(*args, **kwargs):
         bench_times = []
@@ -16,6 +12,7 @@ def generate_timed(func):
             bench_times.append(time.time() - start_time)
         print("Mean: %.3fs" % np.mean(bench_times))
         print("Standard Deviation: %.3fs" % np.std(bench_times))
+        print('')
     return timed_func
 
 '''
@@ -26,8 +23,8 @@ def bilayer_benchmark():
     upper_leaf_comp   = mav.read_comp("compositions/upper_leaf_comp")
     lower_leaf_comp   = mav.read_comp("compositions/lower_leaf_comp")
     
-    upper_leaf = mav.Lattice(200., 200., 23., 655, upper_leaf_comp)
-    lower_leaf = mav.Lattice(200., 200., 0., 655, lower_leaf_comp)
+    upper_leaf = mav.Lattice(200., 200., 23., 655, upper_leaf_comp, seed = 0)
+    lower_leaf = mav.Lattice(200., 200., 0., 655, lower_leaf_comp, seed = 0)
     
     upper_leaf.distribute()
     lower_leaf.distribute()
@@ -44,8 +41,8 @@ def porin_gird_benchmark():
     upper_leaf_comp   = mav.read_comp("compositions/upper_leaf_comp")
     lower_leaf_comp   = mav.read_comp("compositions/lower_leaf_comp")
     
-    upper_leaf = mav.Lattice(200., 200., 23., 655, upper_leaf_comp)
-    lower_leaf = mav.Lattice(200., 200., 0., 655, lower_leaf_comp)
+    upper_leaf = mav.Lattice(200., 200., 23., 655, upper_leaf_comp, seed = 0)
+    lower_leaf = mav.Lattice(200., 200., 0., 655, lower_leaf_comp, seed = 0)
     
     upper_leaf.distribute()
     lower_leaf.distribute()
@@ -54,7 +51,7 @@ def porin_gird_benchmark():
 
     porin_comp = mav.read_comp("compositions/porin_comp")
     
-    porin_grid = mav.Grid(150., 150., 0., 2, 2, porin_comp)
+    porin_grid = mav.Grid(150., 150., 0., 2, 2, porin_comp, seed = 0)
     porin_grid.distribute() 
     
     porin_grid + (bilayer.centroid() - porin_grid.centroid())
@@ -76,15 +73,15 @@ def nanodisc_benchmark():
 
     nanodisc_comp = mav.read_comp("compositions/nanodisc_comp")
     
-    upper_leaf = mav.Disc(95., 23., 464, upper_leaf_comp)
-    lower_leaf = mav.Disc(95.,  0., 464, lower_leaf_comp)
+    upper_leaf = mav.Disc(95., 23., 464, upper_leaf_comp, seed = 0)
+    lower_leaf = mav.Disc(95.,  0., 464, lower_leaf_comp, seed = 0)
     
     upper_leaf.distribute()
     lower_leaf.distribute()
     
     disc = upper_leaf + lower_leaf
     
-    msp2n2_1 = mav.Lattice(115., 115., 0., 1, nanodisc_comp)
+    msp2n2_1 = mav.Lattice(115., 115., 0., 1, nanodisc_comp, seed = 0)
     msp2n2_1 + (disc.centroid() - msp2n2_1.centroid())
 
     disc.remove_overlap(msp2n2_1, radius = 3.0)
@@ -104,18 +101,18 @@ def nanodisc_spike_benchmark():
 
     spike_comp = mav.read_comp("compositions/spike_comp")
     
-    upper_leaf = mav.Disc(95., 23., 464, upper_leaf_comp)
-    lower_leaf = mav.Disc(95.,  0., 464, lower_leaf_comp)
+    upper_leaf = mav.Disc(95., 23., 464, upper_leaf_comp, seed = 0)
+    lower_leaf = mav.Disc(95.,  0., 464, lower_leaf_comp, seed = 0)
     
     upper_leaf.distribute()
     lower_leaf.distribute()
     
     disc = upper_leaf + lower_leaf
     
-    msp2n2_1 = mav.Lattice(115., 115., 0., 1, nanodisc_comp)
+    msp2n2_1 = mav.Lattice(115., 115., 0., 1, nanodisc_comp, seed = 0)
     msp2n2_1 + (disc.centroid() - msp2n2_1.centroid())
 
-    spike = mav.Lattice(95., 95., 0., 1, spike_comp)
+    spike = mav.Lattice(95., 95., 0., 1, spike_comp, seed = 0)
     spike + (disc.centroid() - spike.centroid())
     spike + np.array([0., 0., 70.])
 
@@ -133,8 +130,8 @@ def nanotube_benchmark():
     upper_leaf_comp   = mav.read_comp("compositions/upper_leaf_comp")
     lower_leaf_comp   = mav.read_comp("compositions/lower_leaf_comp")
     
-    outer_leaf = mav.Cylinder(50., 250., 0., 1839, upper_leaf_comp)
-    inner_leaf = mav.Cylinder(27., 250., 0., 993, lower_leaf_comp)
+    outer_leaf = mav.Cylinder(50., 250., 0., 1839, upper_leaf_comp, seed = 0)
+    inner_leaf = mav.Cylinder(27., 250., 0., 993, lower_leaf_comp, seed = 0)
     
     outer_leaf.distribute()
     inner_leaf.distribute()
@@ -152,8 +149,8 @@ def nanotube_array_benchmark():
     upper_leaf_comp   = mav.read_comp("compositions/upper_leaf_comp")
     lower_leaf_comp   = mav.read_comp("compositions/lower_leaf_comp")
     
-    outer_leaf = mav.Cylinder(50., 250., 0., 1839, upper_leaf_comp)
-    inner_leaf = mav.Cylinder(27., 250., 0., 993, lower_leaf_comp)
+    outer_leaf = mav.Cylinder(50., 250., 0., 1839, upper_leaf_comp, seed = 0)
+    inner_leaf = mav.Cylinder(27., 250., 0., 993, lower_leaf_comp, seed = 0)
     
     outer_leaf.distribute()
     inner_leaf.distribute()
@@ -212,8 +209,8 @@ def mem_vesi_benchmark():
     
     vesicle = outer_leaf + inner_leaf
     
-    upper_leaf = mav.Lattice(350., 350., 23., 2008, upper_leaf_comp)
-    lower_leaf = mav.Lattice(350., 350., 0., 2008, lower_leaf_comp)
+    upper_leaf = mav.Lattice(350., 350., 23., 2008, upper_leaf_comp, seed = 0)
+    lower_leaf = mav.Lattice(350., 350., 0., 2008, lower_leaf_comp, seed = 0)
     upper_leaf.distribute()
     lower_leaf.distribute()
     bilayer = upper_leaf + lower_leaf
@@ -221,7 +218,7 @@ def mem_vesi_benchmark():
     vesicle + (bilayer.centroid() - vesicle.centroid())
     vesicle + np.array([0., 0., 300.])
     
-    a2t = mav.Grid(240., 240., 0., 3, 3, a2t_comp)
+    a2t = mav.Grid(240., 240., 0., 3, 3, a2t_comp, seed = 0)
     a2t.distribute() 
     a2t + (bilayer.centroid() - a2t.centroid())
     a2t + np.array([0., 0., 100.])
@@ -252,7 +249,7 @@ def mem_vesi_benchmark():
     vesicle0 + np.array([0., 0., 370.])
     vesi_vesi = vesicle + vesicle0
 
-    a2t = mav.Grid(240., 240., 0., 3, 3, a2t_comp)
+    a2t = mav.Grid(240., 240., 0., 3, 3, a2t_comp, seed = 0)
     a2t.distribute() 
     a2t + (vesi_vesi.centroid() - a2t.centroid())
     
@@ -270,13 +267,13 @@ def covid_benchmark():
     lower_leaf_comp   = mav.read_comp("compositions/lower_leaf_comp")
     spike_comp = mav.read_comp("compositions/spike_comp")
     
-    outer_leaf = mav.Sphere(500., 0., 51475, upper_leaf_comp)
-    inner_leaf = mav.Sphere(475., 0., 46456, lower_leaf_comp)
+    outer_leaf = mav.Sphere(500., 0., 51475, upper_leaf_comp, seed = 0)
+    inner_leaf = mav.Sphere(475., 0., 46456, lower_leaf_comp, seed = 0)
     outer_leaf.distribute()
     inner_leaf.distribute()
     vesicle = outer_leaf + inner_leaf
     
-    spike = mav.Sphere(600., 0., 75, spike_comp)
+    spike = mav.Sphere(600., 0., 75, spike_comp, seed = 0)
     spike.distribute()
     
     vesicle.remove_overlap(spike, 4.)

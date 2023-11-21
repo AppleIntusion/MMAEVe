@@ -1580,10 +1580,13 @@ class BiomolComplex(object):
         '''
         atom_count = len(self.tail)            # Total number of atoms
         res_count = np.sum(self.residue_count) # Total # of residues
+        write_string = "{:4s}  {:5d} {:4s} {:4s}{:1s}{:4d}    " + \
+                       "{:8.3f}{:8.3f}{:8.3f}\n"
 
         # PDB fields to write: atom serial, atom name, residue name, 
         # chain id, residue number, x, y, z.
         fields = [
+            np.repeat("ATOM", atom_count),
             np.arange(1, atom_count + 1, 1), # len correctable
             self.name,
             self.resn,
@@ -1592,25 +1595,40 @@ class BiomolComplex(object):
                           self.residue_atom_count), # len correctable
             np.round(self.xyz[:, 0], decimals = 3),
             np.round(self.xyz[:, 1], decimals = 3),
-            np.round(self.xyz[:, 2], decimals = 3)]
+            np.round(self.xyz[:, 2], decimals = 3),
+            np.repeat(write_string, atom_count)]
         # Reduce atom serial and residue number to proper size
-        fields[0] = np.mod(fields[0], 100000)
-        fields[4] = np.mod(fields[4], 10000)
-        nparts = self.xyz.shape[0] # Number of file lines
-        resid = np.zeros(nparts, dtype = int)
-        count = 1
+        fields[1] = np.mod(fields[1], 100000)
+        fields[5] = np.mod(fields[5], 10000)
+
+        # Join fields together into single array and insert TER lines
+        insertion_indicies = np.cumsum(self.entity_atom_count)
+        fields[0] = np.insert(fields[0], insertion_indicies, "TER", 
+                              axis = 0)
+        print(len(fields[0]))
+        fields[1] = np.insert(fields[1], insertion_indicies, 0, axis = 0)
+        fields[2] = np.insert(fields[2], insertion_indicies, '', axis = 0)
+        fields[3] = np.insert(fields[3], insertion_indicies, '', axis = 0)
+        fields[4] = np.insert(fields[4], insertion_indicies, '', axis = 0)
+        fields[5] = np.insert(fields[5], insertion_indicies, 0, axis = 0)
+        fields[6] = np.insert(fields[6], insertion_indicies, 0., axis = 0)
+        fields[7] = np.insert(fields[7], insertion_indicies, 0., axis = 0)
+        fields[8] = np.insert(fields[8], insertion_indicies, 0., axis = 0)
+        write_ter = "{:3s}\n"
+        fields[9] = np.insert(fields[9], insertion_indicies, write_ter, axis = 0)
 
         # Used to format when writing file lines.
-        write_string = "ATOM  {:5d} {:4s} {:4s}{:1s}{:4d}    " + \
-                       "{:8.3f}{:8.3f}{:8.3f}\n"
+        nparts = len(fields[0]) # Number of file lines
+        count = 1
         with open(file_name, 'w', buff) as fout:
             chunks = list(range(0, nparts, chunksize))
             chunks.append(nparts + 1)   # so slicing is from 2ndtolast:size
 
             for startind, stopind in zip(chunks[:-1], chunks[1:]):
                 fout.writelines(
-                    [write_string.format(ii[0], ii[1], ii[2], ii[3], 
-                                         ii[4], ii[5], ii[6], ii[7]) 
+                    [ii[9][startind:stopind].format(ii[0], ii[1], ii[2], ii[3], 
+                                         ii[4], ii[5], ii[6], ii[7],
+                                         ii[8]) 
                      for ii in zip(fields[0][startind:stopind],  
                                    fields[1][startind:stopind],
                                    fields[2][startind:stopind],
@@ -1618,7 +1636,9 @@ class BiomolComplex(object):
                                    fields[4][startind:stopind],
                                    fields[5][startind:stopind],
                                    fields[6][startind:stopind],
-                                   fields[7][startind:stopind])
+                                   fields[7][startind:stopind],
+                                   fields[8][startind:stopind],
+                                   fields[9][startind:stopind])
                     ]
                 )
 
