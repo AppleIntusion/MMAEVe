@@ -1148,6 +1148,10 @@ class BiomolComplex(object):
             self.structures.append(mol)
         self.structures = np.array(self.structures)
         self.ratios = np.array(self.ratios)
+        # Check for instances of 0% composition and remove those 
+        # structures.
+        self.structures = self.structures[self.ratios != 0.]
+        self.ratios = self.ratios[self.ratios != 0.]
 
     def set_seed(seed):
         np.random.seed(seed)
@@ -1620,7 +1624,7 @@ class BiomolComplex(object):
         nparts = len(fields[0]) # Number of file lines
         count = 1
         with open(file_name, 'w', buff) as fout:
-            chunks = list(range(0, nparts, chunksize))
+            chunks = list(range(0, chunksize, nparts))
             chunks.append(nparts + 1)   # so slicing is from 2ndtolast:size
 
             for startind, stopind in zip(chunks[:-1], chunks[1:]):
@@ -1653,9 +1657,12 @@ class BiomolComplex(object):
         '''
         itp_names = Molecule.get_itp_name(self.structures)
         itp_names = itp_names.astype(str)
-        _, counts = np.unique(self.ids, return_counts = True)
+        #_, counts = np.unique(self.ids, return_counts = True)
+        itp_names, counts = np.unique(self.ids, return_counts = True)
+        print(itp_names)
         counts = counts.astype(str)
         top_lines = np.char.add(itp_names, '\t\t')
+        print(top_lines)
         top_lines = np.char.add(top_lines, counts)
         top_header = ["; You'll need to add all of the itp-file " + \
                       "references", " ", "[ molecule ]", 
