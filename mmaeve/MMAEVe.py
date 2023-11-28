@@ -1658,12 +1658,11 @@ class BiomolComplex(object):
         itp_names = Molecule.get_itp_name(self.structures)
         itp_names = itp_names.astype(str)
         _, counts = np.unique(self.ids, return_counts = True)
-        itp_names, counts = np.unique(self.ids, return_counts = True)
         counts = counts.astype(str)
         top_lines = np.char.add(itp_names, '\t\t')
         top_lines = np.char.add(top_lines, counts)
         top_header = ["; You'll need to add all of the itp-file " + \
-                      "references", " ", "[ molecule ]", 
+                      "references", " ", "[ molecules ]", 
                       ";Name\t\tCount"]
         top_lines = np.concatenate([top_header, top_lines])
 
