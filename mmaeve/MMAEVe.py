@@ -835,11 +835,11 @@ def read_comp(file_name):
                name that will be used when writing a gromacs top file. 
                The third column is the fraction of positons that each 
                structure will occupy. The fourth column is the 
-               z-shift. The fifth column is the 
-               'serial-residue_number-residue_name' used to specify 
-               which atom will serve as the head. The sixth column is 
-               the 'serial-residue_number-residue_name' used to 
-               specify which atom will serve as the tail.
+               shift relative to the shape normal. The fifth column 
+               is the 'serial-residue_number-residue_name' used to 
+               specify which atom will serve as the head. The sixth 
+               column is the 'serial-residue_number-residue_name' used 
+               to specify which atom will serve as the tail.
     Arguments: file_name) String. Name of the composition file.
     Returns:   Dictionary. Properly formatted to be used when 
                initializing any of the supported shapes.
@@ -853,7 +853,7 @@ def read_comp(file_name):
         struc_data = line.split()
         comp[struc_data[0]] = {"itp"      : struc_data[1], 
                                "Fraction" : float(struc_data[2]), 
-                               "z_shift"  : float(struc_data[3]), 
+                               "Shift"    : float(struc_data[3]), 
                                "Head"     : struc_data[4], 
                                "Tail"     : struc_data[5]}
     return(comp)
@@ -908,12 +908,13 @@ class BiomolComplex(object):
         * E) Number of residues in the system.
     '''
     def __init__(self, positions = None, structures = None, 
-                 ratios = None, ids = None, serial = None, 
-                 name = None, resi = None, resn = None, chain = None, 
-                 xyz = None, elem = None, mass = None, charge = None, 
-                 radius = None, head = None, tail = None, 
-                 entity_count = 0, entity_atom_count = None, 
-                 residue_count = None, residue_atom_count = None):
+                 ratios = None, itp_names = None, shifts = None, 
+                 ids = None, serial = None, name = None, resi = None, 
+                 resn = None, chain = None, xyz = None, elem = None, 
+                 mass = None, charge = None, radius = None, 
+                 head = None, tail = None, entity_count = 0, 
+                 entity_atom_count = None, residue_count = None, 
+                 residue_atom_count = None):
         ''' 
         Initialize class instance.
         '''
@@ -929,6 +930,14 @@ class BiomolComplex(object):
             self.ratios = np.array([]) 
         else:
             self.ratios = ratios 
+        if itp_names is None:
+            self.itp_names = np.array([]) 
+        else:
+            self.itp_names = itp_names 
+        if shifts is None:
+            self.shifts = np.array([]) 
+        else:
+            self.shifts = shifts
         if ids is None:
             self.ids = np.array([])
         else:
@@ -1132,6 +1141,8 @@ class BiomolComplex(object):
         '''
         self.ratios = []
         self.structures = []
+        self.itp_names = []
+        self.shifts = []
         for name in composition:
             self.ratios.append(composition[name]["Fraction"])
             pdb = PdbFile(structure_name = name)
@@ -1142,8 +1153,12 @@ class BiomolComplex(object):
             mol.add_radius()
             mol.add_mass()
             self.structures.append(mol)
+            self.itp_names.append(composition[name]["itp"])
+            self.shifts.append(composition[name]["Shift"])
         self.structures = np.array(self.structures)
         self.ratios = np.array(self.ratios)
+        self.itp_names = np.array(self.itp_names)
+        self.shifts = np.array(self.shifts)
         # Check for instances of 0% composition and remove those 
         # structures.
         self.structures = self.structures[self.ratios != 0.]
@@ -1672,6 +1687,7 @@ class Lattice(BiomolComplex):
         self.generate_positions(length, width, height, number)
         self.gen_ids(seed = seed)
         self.sort_ids()
+        self.apply_shift()
         self.populate_structure_components()
 
     def generate_positions(self, length, width, height, number):
@@ -1688,6 +1704,18 @@ class Lattice(BiomolComplex):
         Returns:   None
         '''
         self.positions = fib_lattice(length, width, height, number)
+
+    def apply_shift(self):
+        '''
+        Purpose:   Apply the previously specified shift to the system.
+        Arguments: self) BiomolComplex instance.
+        Requires:  None
+        Modifies:  positions
+        Returns:   None
+        '''
+        self.positions[:, 2] = self.positions[:, 2] + \
+                               self.shifts[self.ids]
+        
 
     def distribute(self):
         '''
@@ -1725,6 +1753,7 @@ class Grid(Lattice):
                                 w_number)
         self.gen_ids(seed = seed)
         self.sort_ids()
+        self.apply_shift()
         self.populate_structure_components()
 
     def generate_positions(self, length, width, height, l_number, 
@@ -1752,6 +1781,7 @@ class Disc(Lattice):
         self.generate_positions(radius, height, number) 
         self.gen_ids(seed = seed)
         self.sort_ids()
+        self.apply_shift()
         self.populate_structure_components()
 
     def generate_positions(self, radius, height, number):
@@ -1777,6 +1807,7 @@ class Circle(Lattice):
         self.generate_positions(radius, height, number) 
         self.gen_ids(seed = seed)
         self.sort_ids()
+        self.apply_shift()
         self.populate_structure_components()
 
     def generate_positions(self, radius, height, number):
@@ -1802,6 +1833,7 @@ class Cylinder(BiomolComplex):
         self.generate_positions(radius, length, height, number)
         self.gen_ids(seed = seed)
         self.sort_ids()
+        self.apply_shift()
         self.populate_structure_components()
 
     def generate_positions(self, radius, length, height, number):
@@ -1818,7 +1850,22 @@ class Cylinder(BiomolComplex):
         Returns:   None
         '''
         self.positions = fib_cylinder(radius, length, height, 
-                                         number)
+                                      number)
+
+    def apply_shift(self):
+        '''
+        Purpose:   Apply the previously specified shift to the system.
+        Arguments: self) BiomolComplex instance.
+        Requires:  None
+        Modifies:  positions
+        Returns:   None
+        '''
+        shift = np.copy(self.positions)
+        shift[:, 2] = 0.
+        mag   = np.linalg.norm(shift, axis = 1).reshape((len(self.positions), 1))
+        shift = shift / mag
+        shift = shift * self.shifts[self.ids].reshape((len(self.positions), 1))       
+        self.positions = self.positions + shift
 
     def distribute(self):
         '''
@@ -1867,6 +1914,7 @@ class Sphere(BiomolComplex):
             self.make_equilibration_pores(radius = pore_radius)
         self.gen_ids(seed = seed)
         self.sort_ids()
+        self.apply_shift()
         self.populate_structure_components()
 
     def generate_positions(self, radius, height, number):
@@ -1883,6 +1931,19 @@ class Sphere(BiomolComplex):
         Returns:   None
         '''
         self.positions = fib_sphere(radius, height, number)
+
+    def apply_shift(self):
+        '''
+        Purpose:   Apply the previously specified shift to the system.
+        Arguments: self) BiomolComplex instance.
+        Requires:  None
+        Modifies:  positions
+        Returns:   None
+        '''
+        shift = np.linalg.norm(self.positions, axis = 1).reshape((len(self.positions), 1))
+        shift = self.positions / shift
+        shift = shift * self.shifts[self.ids].reshape((len(self.positions), 1))       
+        self.positions = self.positions + shift
 
     def make_equilibration_pores(self, axes = ['x', 'y', 'z'], 
                                  radius = 0.0):
@@ -1942,7 +2003,3 @@ class Sphere(BiomolComplex):
 
         # Translate head to position
         self.to_positions(positions)
-
-if __name__ == "__main__":
-    #test = read_comp("../tutorial/compositions/a2t_comp")
-    test = read_comp("../tutorial/compositions/a2_comp")
