@@ -1059,6 +1059,10 @@ class BiomolComplex(object):
                                              struc2.positions])
         structures         = np.concatenate([self.structures, 
                                              struc2.structures])
+        itp_names          = np.concatenate([self.itp_names, 
+                                             struc2.itp_names])
+        shifts             = np.concatenate([self.shifts, 
+                                             struc2.shifts])
         serial             = np.concatenate([self.serial, 
                                              struc2.serial])
         name               = np.concatenate([self.name, 
