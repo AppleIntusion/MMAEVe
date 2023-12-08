@@ -34,7 +34,7 @@ def fib_lattice(length, width, height, n_points):
                lattice.
     '''
     if n_points == 1:
-        return(np.array([[0., 0., 0.]]))
+        return(np.array([[0., 0., height]]))
         
     eps = 0.5
     au_ratio = (1 + (5 ** 0.5)) / 2
