@@ -1,4 +1,5 @@
-import MMAEVe as mav
+#import MMAEVe as mav
+import mmaeve as mav
 import numpy as np
 import copy 
 import time
