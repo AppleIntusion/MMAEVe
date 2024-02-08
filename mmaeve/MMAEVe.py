@@ -1133,12 +1133,13 @@ class BiomolComplex(object):
 
         return(
             BiomolComplex(positions = positions, 
-                structures = structures, ratios = ratios, ids = ids, 
-                serial = serial, name = name, resi = resi, 
-                resn = resn, chain = chain, xyz = xyz, elem = elem, 
-                mass = mass, charge = charge, radius = radius, 
-                head = head, tail = tail, entity_count = entity_count, 
-                entity_atom_count = entity_atom_count, 
+                structures = structures, ratios = ratios, 
+                itp_names = itp_names, ids = ids, serial = serial, 
+                name = name, resi = resi, resn = resn, chain = chain, 
+                xyz = xyz, elem = elem, mass = mass, charge = charge, 
+                radius = radius, head = head, tail = tail, 
+                entity_count = entity_count, 
+                entity_atom_count = entity_atom_count,
                 residue_count = residue_count, 
                 residue_atom_count = residue_atom_count))
 
@@ -1216,9 +1217,21 @@ class BiomolComplex(object):
             state = np.random.RandomState()
         else:
             state = np.random.RandomState(seed)
-        id_pool = np.arange(0, len(self.structures), 1)
-        self.ids = state.choice(id_pool, len(self.positions),
-                                p = self.ratios)
+
+        total_lipids = len(self.positions)
+        id_pool = np.array([])
+        for ii, ratio in enumerate(self.ratios):
+            proportion = ratio / np.sum(self.ratios)
+            number = int(np.round(proportion * total_lipids, 0))
+            id_pool = np.concatenate([id_pool, np.repeat(ii, number)])
+        id_pool = id_pool.astype(int)
+
+        # This shouldn't break but I have left a message with a DEBUG tag just in case.
+        if len(id_pool) != len(self.positions):
+            print("YOUR CODE IS BROKEN. CHECK `gen_ids`", len(id_pool), len(self.positions)) # DEBUG
+
+        state.shuffle(id_pool)
+        self.ids = id_pool
 
     def sort_ids(self):
         ''' 
@@ -1643,6 +1656,7 @@ class BiomolComplex(object):
             np.round(self.xyz[:, 1], decimals = 3),
             np.round(self.xyz[:, 2], decimals = 3),
             np.repeat(write_string, atom_count)]
+        print(fields[4]) # DEBUG
         # Reduce atom serial and residue number to proper size
         fields[1] = np.mod(fields[1], 100000)
         fields[5] = np.mod(fields[5], 10000)
@@ -1661,6 +1675,8 @@ class BiomolComplex(object):
         fields[8] = np.insert(fields[8], insertion_indicies, 0., axis = 0)
         write_ter = "{:3s}\n"
         fields[9] = np.insert(fields[9], insertion_indicies, write_ter, axis = 0)
+        print(fields[3]) # DEBUG
+        print(fields[9]) # DEBUG
 
         # Used to format when writing file lines.
         nparts = len(fields[0]) # Number of file lines
@@ -1700,6 +1716,7 @@ class BiomolComplex(object):
         '''
         itp_names = Molecule.get_itp_name(self.structures)
         itp_names = itp_names.astype(str)
+        itp_names = self.itp_names
         _, counts = np.unique(self.ids, return_counts = True)
         counts = counts.astype(str)
         top_lines = np.char.add(itp_names, '\t\t')
@@ -1756,6 +1773,7 @@ class Lattice(BiomolComplex):
                    to the origin using the tail atom. Aligns the 
                    molecules to the z-axis. Distributes the molecules 
                    to their positions using the head atoms.
+                   itp_names = self.itp_names
         Arguments: self) BiomolComplex instance.
         Requires:  positions, entity_atom_count, xyz, head, tail
         Modifies:  xyz, head, tail
