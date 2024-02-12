@@ -1194,6 +1194,7 @@ class BiomolComplex(object):
         self.shifts = np.array(self.shifts)
         # Check for instances of 0% composition and remove those 
         # structures.
+        self.itp_names = self.itp_names[self.ratios != 0.]
         self.structures = self.structures[self.ratios != 0.]
         self.ratios = self.ratios[self.ratios != 0.]
 
