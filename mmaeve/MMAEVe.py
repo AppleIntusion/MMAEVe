@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import scipy.spatial
 import mmap
+import decimal as dec
 
 '''
 Shapes and Math
@@ -1220,13 +1221,32 @@ class BiomolComplex(object):
 
         total_lipids = len(self.positions)
         id_pool = np.array([])
+
+        dec.getcontext().prec = 10
+        proportions = []
+        numbers = []
         for ii, ratio in enumerate(self.ratios):
             proportion = ratio / np.sum(self.ratios)
+            proportion = np.round(proportion, 5)
             number = int(np.round(proportion * total_lipids, 0))
             id_pool = np.concatenate([id_pool, np.repeat(ii, number)])
         id_pool = id_pool.astype(int)
 
-        # This shouldn't break but I have left a message with a DEBUG tag just in case.
+        # It pains me to admit it, but the rounding error spanked me.
+        # This is a temporary fix, if there are a mismatch of positions
+        # to ids then the number is corrected. Shouldn't ever be more
+        # than one but, the solution will handle cases where the total
+        # number is off by more than one. DEBUG
+        if len(id_pool) < len(self.positions):
+            to_remove = len(self.positions) - len(id_pool)
+            for ii in range(to_remove):
+                self.positions = np.delete(self.positions, -1, 
+                                           axis = 0)
+        elif len(id_pool) > len(self.positions):
+            to_remove = len(id_pool) - len(self.positions)
+            for ii in range(to_remove):
+                id_pool = np.delete(id_pool, -1, axis = 0)
+        
         if len(id_pool) != len(self.positions):
             print("YOUR CODE IS BROKEN. CHECK `gen_ids`", len(id_pool), len(self.positions)) # DEBUG
 
@@ -1656,7 +1676,6 @@ class BiomolComplex(object):
             np.round(self.xyz[:, 1], decimals = 3),
             np.round(self.xyz[:, 2], decimals = 3),
             np.repeat(write_string, atom_count)]
-        print(fields[4]) # DEBUG
         # Reduce atom serial and residue number to proper size
         fields[1] = np.mod(fields[1], 100000)
         fields[5] = np.mod(fields[5], 10000)
@@ -1675,8 +1694,6 @@ class BiomolComplex(object):
         fields[8] = np.insert(fields[8], insertion_indicies, 0., axis = 0)
         write_ter = "{:3s}\n"
         fields[9] = np.insert(fields[9], insertion_indicies, write_ter, axis = 0)
-        print(fields[3]) # DEBUG
-        print(fields[9]) # DEBUG
 
         # Used to format when writing file lines.
         nparts = len(fields[0]) # Number of file lines
@@ -2156,9 +2173,6 @@ def write_pdb(pdb_data, file_name, buff = 8192, chunksize = 100000):
     count = 1
     with open(file_name, 'w', buff) as fout:
         chunks = list(range(0, chunksize, nparts))
-        print(nparts)
-        print(len(chunks))
-        print(chunks[0:10])
         chunks.append(nparts + 1)   # so slicing is from 2ndtolast:size
 
         for startind, stopind in zip(chunks[:-1], chunks[1:]):
