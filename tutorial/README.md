@@ -32,21 +32,21 @@ This is a good time to investigate the contents of the two composition files.
 
 upper\_leaf\_comp
 ```
-POPC     POPS     CHOL     POP2
-0.6      0.2      0.12     0.08
-2-1-POPC 2-1-POPS 1-1-CHOL 4-1-POP2
-7-1-POPC 7-1-POPS 7-1-CHOL 11-1-POP2
+POPC  POPC  0.6   0.0  2-1-POPC  7-1-POPC 
+POPS  POPS  0.2   0.0  2-1-POPS  7-1-POPS 
+CHOL  CHOL  0.12  0.0  1-1-CHOL  7-1-CHOL 
+POP2  POP2  0.00  0.0  4-1-POP2  11-1-POP2
 ```
 
 lower\_leaf\_comp
 ```
-POPC     POPS     CHOL     POP2
-0.6      0.2      0.12     0.08
-7-1-POPC 7-1-POPS 7-1-CHOL 11-1-POP2
-2-1-POPC 2-1-POPS 1-1-CHOL 4-1-POP2
+POPC  POPC  0.6  0.0  7-1-POPC  2-1-POPC
+POPS  POPS  0.2  0.0  7-1-POPS  2-1-POPS
+CHOL  CHOL  0.12 0.0  7-1-CHOL  1-1-CHOL
+POP2  POP2  0.08 0.0  11-1-POP2 4-1-POP2
 ```
 
-Each file contains a space-deliminated column for each molecule that will be in the system. The first column entry corresponds to the PDB file prefix of of a file in the `structures` directory. If you look inside the `structures` directory you will see that `POPC.pdb POPS.pdb POP2.pdb CHOL.pdb` are all present. The second entry is the fraction of the system that the molecule will compose. The last two lines define which atom will serve as the "Head" and "Tail" of the molecule, respectively. The atom key is composed of the atom serial number, the residue number, and the residue name joined by a single '-'. Notice that the only difference between `upper_leaf_comp` and `lower_leaf_comp` is that the identities of the Head and Tail atoms are swapped. This is so that the lipids in each leaflet will be oriented in opposite directions.
+Each file contains a space-deliminated row for each molecule that will be in the system. The first column corresponds to the PDB file prefix of a file in the `structures` directory. If you look inside the `structures` directory you will see that `POPC.pdb POPS.pdb POP2.pdb CHOL.pdb` are all present. The second entry is the name that will be used if a GROMACS top file is written. The third entry is the fraction of the system that the molecule will compose. The fourth entry is the "z-shift". It represents a translation with respect to the rest of the normal of the shape. This is handy if you have, for example, a protein component of variable composition where the proteins are of differing dimensions. The last two lines define which atom will serve as the "Head" and "Tail" of the molecule, respectively. The atom key is composed of the atom serial number, the residue number, and the residue name joined by a single '-'. Notice that the only difference between `upper_leaf_comp` and `lower_leaf_comp` is that the identities of the Head and Tail atoms are swapped. This is so that the lipids in each leaflet will be oriented in opposite directions.
 
 The next step is to create two instances of `Lattice` which will correspond to each leaflet. Initializing any structure in MMAEVe requires mandatory positional arguments that describe the system. Lattice requires the width, length, height, number of molecules, and system composition. It should be noted that Å are the default units for MMAEVe.
 ```python
