@@ -1,4 +1,4 @@
-import mmaeve as mav
+import MMAEVe as mav
 import numpy as np
 import copy 
 import time
@@ -9,8 +9,8 @@ import time
 
 start_time = time.time()
 
-upper_leaf_comp   = mav.read_comp("compositions/upper_leaf_comp")
-lower_leaf_comp   = mav.read_comp("compositions/lower_leaf_comp")
+upper_leaf_comp = mav.utils.read_comp("compositions/upper_leaf_comp")
+lower_leaf_comp = mav.utils.read_comp("compositions/lower_leaf_comp")
 
 upper_leaf = mav.Lattice(200., 200., 23., 655, upper_leaf_comp)
 lower_leaf = mav.Lattice(200., 200., 0., 655, lower_leaf_comp)

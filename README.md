@@ -14,23 +14,28 @@ scipy
 pandas
 ```
 
-### Installation via Conda
+### Installation
 
-MMAEVe can be installed easily using the conda package manager. It is available via the conda-forge channel. To install, simply create an environment with a python version >=3.5 and run:
+I intened to make MMAEVe available pip or conda at some point. For now just clone the repo then add it to your PYTHONPATH.
 
 ```bash
-$ conda install -c conda-forge mmaeve
+git clone https://github.com/AppleIntusion/MMAEVe.git
+export PYTHONPATH="${PYTHONPATH}":some_path/MMAEVe
 ```
 
-After installation, MMAEVe can be imported as a Python package.
+Then it can be imported.
+
+```python
+import MMAEVe as mav
+```
 
 ## Usage
 
-A comprehensive [tutorial](tutorial/tutorial.md) is provided. It serves as an introduction to how MMAEVe works and showcase of systems that it can be used to create.
+A comprehensive [tutorial](tutorial/README.md) is provided. It serves as an introduction to how MMAEVe works and showcase of systems that it can be used to create.
 
 ## Example Systems
 
-MMAEVe can be used to easily create complex systems. See the [tutorial](tutorial/tutorial.md) for usage. A couple examples of systems that can be created are shown below.
+MMAEVe can be used to easily create complex systems. See the [tutorial](tutorial/README.md) for usage. A couple examples of systems that can be created are shown below.
 
 ### Membrane-Bridging
 ![](tutorial/images/vesicle_bi_a2t.png)
