@@ -1,5 +1,7 @@
 # MMAEVe - Membranes, Micelles, And Even Vesicles
 
+[![DOI](https://zenodo.org/badge/485386956.svg)](https://zenodo.org/doi/10.5281/zenodo.11105899)
+
 MMAEVe is a simple python package for creating complex biomolecular systems. It can be used to distribute biomolecules about different surfaces, remove overlap between constructed system elements, write pdb files suitable for use as initial starting structures for Amber and Gromacs, and write Gromacs topology files. It is a simple but powerful tool that can be used to systematically generate complex structures.
 
 ## Installation
