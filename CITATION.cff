@@ -1,15 +1,17 @@
-cff-version: 0.1
+cff-version: 0.1.0
 message: "If you use MMAEVe or incorporate it into an existing project, please cite it as below."
 authors:
 - family-names: "Lindsay"
   given-names: "Samuel"
+  orcid: ""
 - family-names: "Sanchez"
   given-names: "Wesley"
+  orcid: ""
 - family-names: "Li"
   given-names: "Yumin"
+  orcid: ""
 title: "MMAEVe"
-version: v0.6
+version: 0.6.0
 doi: 10.5281/zenodo.11105900
 date-released: 2024-5-2
 url: "https://github.com/AppleIntusion/MMAEVe"
-
