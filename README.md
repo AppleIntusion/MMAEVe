@@ -44,3 +44,7 @@ MMAEVe can be used to easily create complex systems. See the [tutorial](tutorial
 
 ### Covid Virion
 ![](tutorial/images/covid_virion.png)
+
+## Citation
+
+Please cite using the citation under "About" if you use MMAEVe or incorporate it into a project.
